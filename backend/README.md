@@ -17,16 +17,20 @@ PostgreSQL for production).
 - **Device API** (`app/api/devices.py`) — create / list / get / revoke / delete,
   each guarded by a role-based permission and written to the audit log.
 - **Agent API** (`app/api/agent.py`) — `POST /agent/enroll` (single-use secret →
-  device token) and `POST /agent/heartbeat` (check-in that updates last-seen and
-  reported agent/OS version). Device tokens are a distinct token type and are
-  rejected on admin endpoints; revoked devices are refused.
+  device token), `POST /agent/heartbeat` (check-in updating last-seen plus
+  reported agent/OS version and health: disk, battery, power), and
+  `POST /agent/usage` (foreground app names + durations, accumulated per app per
+  day). Device tokens are a distinct token type and are rejected on admin
+  endpoints; revoked devices are refused.
+- **Usage view** — `GET /devices/{uid}/usage` (admins with `view_reports`)
+  returns per-app totals over a window of days.
 - **Audit API** (`app/api/audit.py`) — `GET /audit` for admins with
   `view_reports`, newest first, paginated.
 - **Migrations** (`migrations/`) — Alembic; initial schema plus a device-health
   column migration.
-- **Tests** (`../tests/backend/`) — 41 tests covering auth, authorization,
-  device enrollment/heartbeat, token separation, revocation, validation, rate
-  limiting, and audit logging.
+- **Tests** (`../tests/backend/`) — 47 tests covering auth, authorization,
+  device enrollment/heartbeat, token separation, revocation, device health,
+  app-usage reporting/aggregation, validation, rate limiting, and audit logging.
 
 ## Try the full agent flow
 

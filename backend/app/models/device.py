@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, ForeignKey, String
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -46,6 +46,12 @@ class Device(Base):
     # Reported by the agent on check-in (Milestone 4+). Null until first report.
     agent_version: Mapped[str | None] = mapped_column(String(40), nullable=True)
     os_version: Mapped[str | None] = mapped_column(String(80), nullable=True)
+
+    # Latest health snapshot reported by the agent (Milestone 5).
+    disk_free_gb: Mapped[float | None] = mapped_column(Float, nullable=True)
+    disk_total_gb: Mapped[float | None] = mapped_column(Float, nullable=True)
+    battery_percent: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    power_plugged: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow

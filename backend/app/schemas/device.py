@@ -45,6 +45,10 @@ class DeviceOut(BaseModel):
     last_seen_at: datetime | None
     agent_version: str | None = None
     os_version: str | None = None
+    disk_free_gb: float | None = None
+    disk_total_gb: float | None = None
+    battery_percent: int | None = None
+    power_plugged: bool | None = None
 
     @field_serializer("created_at", "updated_at", "last_seen_at")
     def _ser_dt(self, value: datetime | None) -> str | None:

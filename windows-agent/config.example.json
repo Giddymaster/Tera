@@ -1,0 +1,8 @@
+{
+  "server_url": "http://127.0.0.1:8000",
+  "device_uid": "dev_REPLACE_WITH_DEVICE_ID",
+  "enrollment_secret": "REPLACE_WITH_ONE_TIME_ENROLLMENT_SECRET",
+  "heartbeat_interval_seconds": 60,
+  "usage_flush_interval_seconds": 120,
+  "sample_interval_seconds": 5
+}

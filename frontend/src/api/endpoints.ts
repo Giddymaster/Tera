@@ -7,6 +7,7 @@ import type {
   DeviceCreate,
   DeviceCreateResponse,
   DeviceOut,
+  DeviceUsageOut,
   TokenResponse,
 } from "./types";
 
@@ -45,4 +46,8 @@ export function deleteDevice(deviceUid: string): Promise<void> {
 
 export function listAuditLogs(limit = 100): Promise<AuditLogOut[]> {
   return apiRequest<AuditLogOut[]>(`/audit?limit=${limit}`);
+}
+
+export function getDeviceUsage(deviceUid: string, days = 7): Promise<DeviceUsageOut> {
+  return apiRequest<DeviceUsageOut>(`/devices/${deviceUid}/usage?days=${days}`);
 }

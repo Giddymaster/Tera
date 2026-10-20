@@ -35,6 +35,22 @@ export interface DeviceOut {
   last_seen_at: string | null;
   agent_version: string | null;
   os_version: string | null;
+  disk_free_gb: number | null;
+  disk_total_gb: number | null;
+  battery_percent: number | null;
+  power_plugged: boolean | null;
+}
+
+export interface AppUsageOut {
+  app_name: string;
+  seconds: number;
+}
+
+export interface DeviceUsageOut {
+  device_uid: string;
+  days: number;
+  total_seconds: number;
+  apps: AppUsageOut[];
 }
 
 export interface AuditLogOut {

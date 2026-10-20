@@ -7,10 +7,11 @@ devices, revoke access, and delete a device and its record.
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from sqlalchemy import func, select
 
 from app.api.deps import SessionDep, client_ip, require_permission
 from app.core.audit import record_action
@@ -22,12 +23,15 @@ from app.core.security import (
 from app.models.admin import Admin
 from app.models.device import Device
 from app.models.enums import EnrollmentStatus, Permission
+from app.models.usage import AppUsage
 from app.schemas.device import DeviceCreate, DeviceCreateResponse, DeviceOut
+from app.schemas.usage import AppUsageOut, DeviceUsageOut
 
 router = APIRouter(prefix="/devices", tags=["devices"])
 
 ManageDevices = Annotated[Admin, Depends(require_permission(Permission.MANAGE_DEVICES))]
 ViewDevices = Annotated[Admin, Depends(require_permission(Permission.VIEW_DEVICES))]
+ViewReports = Annotated[Admin, Depends(require_permission(Permission.VIEW_REPORTS))]
 
 
 async def _get_or_404(session: SessionDep, device_uid: str) -> Device:
@@ -86,6 +90,30 @@ async def list_devices(session: SessionDep, admin: ViewDevices):
 @router.get("/{device_uid}", response_model=DeviceOut)
 async def get_device(device_uid: str, session: SessionDep, admin: ViewDevices):
     return await _get_or_404(session, device_uid)
+
+
+@router.get("/{device_uid}/usage", response_model=DeviceUsageOut)
+async def device_usage(
+    device_uid: str,
+    session: SessionDep,
+    admin: ViewReports,
+    days: int = Query(default=7, ge=1, le=90),
+):
+    device = await _get_or_404(session, device_uid)
+    cutoff = (datetime.now(timezone.utc).date()) - timedelta(days=days - 1)
+    result = await session.execute(
+        select(AppUsage.app_name, func.sum(AppUsage.seconds).label("seconds"))
+        .where(AppUsage.device_id == device.id, AppUsage.day >= cutoff)
+        .group_by(AppUsage.app_name)
+        .order_by(func.sum(AppUsage.seconds).desc())
+    )
+    apps = [AppUsageOut(app_name=row.app_name, seconds=int(row.seconds)) for row in result]
+    return DeviceUsageOut(
+        device_uid=device.device_uid,
+        days=days,
+        total_seconds=sum(a.seconds for a in apps),
+        apps=apps,
+    )
 
 
 @router.post("/{device_uid}/revoke", response_model=DeviceOut)

@@ -1,0 +1,14 @@
+# Real config contains the enrollment secret — never commit it.
+config.json
+
+# Agent state holds the device token (a credential).
+.agent_state.json
+*.tmp
+
+# Logs may reference app names; keep them local.
+*.log
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]

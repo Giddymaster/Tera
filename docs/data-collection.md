@@ -39,6 +39,23 @@ The heartbeat payload in this milestone carries only the agent version and OS
 version. Richer device health (disk, battery, security status) arrives with the
 Windows agent in Milestone 5 and will be added here then.
 
+## Added in Milestone 5 (Windows agent)
+
+The Windows agent now reports real data from a laptop. Collection is limited to
+work-relevant, non-sensitive information:
+
+| Data                     | When written                         | Contains                                                  | Who can read |
+| ------------------------ | ------------------------------------ | --------------------------------------------------------- | ------------ |
+| Device health            | On each heartbeat (default every 60s) | OS version, free/total disk (system drive), battery % and power state | Admins with `view_devices` |
+| Foreground app usage     | Flushed periodically (default every 120s) | Application **name** (e.g. `chrome.exe`) and active seconds, per app per day | Admins with `view_reports` |
+
+### Explicitly **not** collected by the agent
+
+Window titles, document names, URLs, page contents, keystrokes, clipboard,
+screenshots, microphone, and file contents are never collected. Time while the
+user is idle (no keyboard/mouse past a threshold) is not counted. The agent
+prints a monitoring notice when it starts and identifies itself by agent version.
+
 ## Future milestones
 
 When agents are added, this table will be extended with: foreground application

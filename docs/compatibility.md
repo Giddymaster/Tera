@@ -8,10 +8,10 @@ platform · ❓ feasibility not yet confirmed
 
 | Feature                         | Windows | Android | iOS   | Notes                                              |
 | ------------------------------- | ------- | ------- | ----- | -------------------------------------------------- |
-| Device enrollment / registration | 🚧      | ❓      | ❓    | Backend enroll API done + tested via simulated agent; real Windows agent in M5 |
-| Heartbeat / online status       | 🚧      | 📋      | 📋    | Backend heartbeat + live status done + tested via simulated agent              |
-| Device health (OS, disk, battery)| 📋      | ❓      | ❓    |                                                    |
-| Foreground app usage             | 📋      | ❓      | ❌    | iOS MDM does not expose per-app foreground usage   |
+| Device enrollment / registration | ✅      | ❓      | ❓    | Windows agent enrolls via one-time secret (tested on Windows 11)               |
+| Heartbeat / online status       | ✅      | 📋      | 📋    | Windows agent check-ins drive live status (tested on Windows 11)               |
+| Device health (OS, disk, battery)| ✅      | ❓      | ❓    | Windows agent reports OS/disk/battery (tested on Windows 11)                    |
+| Foreground app usage             | ✅      | ❓      | ❌    | Windows: app names + durations, idle excluded (tested). iOS MDM cannot do this  |
 | Policy-controlled screenshots    | 📋      | ❌      | ❌    | Not available via standard Android/iOS MDM         |
 | Authorized live remote support   | 📋      | ❓      | ❌    | Use an established, maintained remote-support tech |
 | Location                         | ❓      | ❓      | ❓    | Depends on enrollment model / permissions          |

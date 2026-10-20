@@ -26,9 +26,13 @@ class EnrollResponse(BaseModel):
 
 
 class HeartbeatRequest(BaseModel):
-    # Optional health info the agent reports. More fields arrive in Milestone 5.
+    # Optional health info the agent reports.
     agent_version: str | None = Field(default=None, max_length=40)
     os_version: str | None = Field(default=None, max_length=80)
+    disk_free_gb: float | None = Field(default=None, ge=0)
+    disk_total_gb: float | None = Field(default=None, ge=0)
+    battery_percent: int | None = Field(default=None, ge=0, le=100)
+    power_plugged: bool | None = None
 
 
 class HeartbeatResponse(BaseModel):

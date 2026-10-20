@@ -19,6 +19,7 @@ from app.core.rate_limit import SlidingWindowLimiter
 from app.core.security import create_device_token, verify_secret
 from app.models.device import Device
 from app.models.enums import EnrollmentStatus
+from app.models.usage import AppUsage
 from app.schemas.agent import (
     EnrollRequest,
     EnrollResponse,
@@ -26,6 +27,7 @@ from app.schemas.agent import (
     HeartbeatResponse,
 )
 from app.schemas.device import DeviceOut
+from app.schemas.usage import UsageReportRequest
 
 settings = get_settings()
 router = APIRouter(prefix="/agent", tags=["agent"])
@@ -106,6 +108,14 @@ async def heartbeat(
         device.agent_version = payload.agent_version
     if payload.os_version is not None:
         device.os_version = payload.os_version
+    if payload.disk_free_gb is not None:
+        device.disk_free_gb = payload.disk_free_gb
+    if payload.disk_total_gb is not None:
+        device.disk_total_gb = payload.disk_total_gb
+    if payload.battery_percent is not None:
+        device.battery_percent = payload.battery_percent
+    if payload.power_plugged is not None:
+        device.power_plugged = payload.power_plugged
     await session.commit()
 
     return HeartbeatResponse(
@@ -113,3 +123,36 @@ async def heartbeat(
         last_seen_at=now,
         server_time=now,
     )
+
+
+@router.post("/usage", status_code=status.HTTP_204_NO_CONTENT)
+async def report_usage(
+    payload: UsageReportRequest, session: SessionDep, device: CurrentDevice
+):
+    """Merge foreground app-usage entries (app name + seconds) for this device.
+
+    Durations accumulate per app per day. No window titles, URLs, or content are
+    accepted or stored.
+    """
+    today = datetime.now(timezone.utc).date()
+    for entry in payload.entries:
+        day = entry.day or today
+        existing = await session.scalar(
+            select(AppUsage).where(
+                AppUsage.device_id == device.id,
+                AppUsage.app_name == entry.app_name,
+                AppUsage.day == day,
+            )
+        )
+        if existing is None:
+            session.add(
+                AppUsage(
+                    device_id=device.id,
+                    app_name=entry.app_name,
+                    day=day,
+                    seconds=entry.seconds,
+                )
+            )
+        else:
+            existing.seconds += entry.seconds
+    await session.commit()

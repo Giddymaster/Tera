@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ApiError } from "../api/client";
-import { getDevice } from "../api/endpoints";
-import type { DeviceOut } from "../api/types";
+import { getDevice, getDeviceUsage } from "../api/endpoints";
+import type { DeviceOut, DeviceUsageOut } from "../api/types";
 import { StatusBadge } from "../components/StatusBadge";
 import { computeStatus } from "../lib/deviceStatus";
-import { formatDateTime, relativeTime } from "../lib/format";
+import { formatDateTime, formatDuration, relativeTime } from "../lib/format";
 
 const OS_LABEL: Record<string, string> = {
   windows: "Windows",
@@ -13,17 +13,21 @@ const OS_LABEL: Record<string, string> = {
   ios: "iOS",
 };
 
-// Sections that will be populated in later milestones. Shown here so the device
-// page reflects the full plan honestly, without implying data exists yet.
+// Sections populated in later milestones.
 const FUTURE_SECTIONS = [
-  { title: "Application usage", milestone: "Milestone 5" },
   { title: "Screenshots & sessions", milestone: "Milestone 7" },
   { title: "Location", milestone: "Milestone 10" },
 ];
 
+function diskLabel(device: DeviceOut): string | null {
+  if (device.disk_free_gb == null || device.disk_total_gb == null) return null;
+  return `${device.disk_free_gb.toFixed(0)} GB free of ${device.disk_total_gb.toFixed(0)} GB`;
+}
+
 export function DeviceDetailPage() {
   const { deviceUid = "" } = useParams();
   const [device, setDevice] = useState<DeviceOut | null>(null);
+  const [usage, setUsage] = useState<DeviceUsageOut | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,8 +35,14 @@ export function DeviceDetailPage() {
     let active = true;
     async function load() {
       try {
-        const d = await getDevice(deviceUid);
-        if (active) setDevice(d);
+        const [d, u] = await Promise.all([
+          getDevice(deviceUid),
+          getDeviceUsage(deviceUid, 7).catch(() => null),
+        ]);
+        if (active) {
+          setDevice(d);
+          setUsage(u);
+        }
       } catch (err) {
         if (active) {
           setError(
@@ -62,6 +72,15 @@ export function DeviceDetailPage() {
       </div>
     );
   }
+
+  const disk = diskLabel(device);
+  const diskUsedPct =
+    device.disk_free_gb != null && device.disk_total_gb
+      ? Math.round(
+          ((device.disk_total_gb - device.disk_free_gb) / device.disk_total_gb) * 100,
+        )
+      : null;
+  const maxUsage = usage?.apps.length ? usage.apps[0].seconds : 0;
 
   return (
     <div className="page">
@@ -118,13 +137,79 @@ export function DeviceDetailPage() {
         </dl>
       </section>
 
+      <section className="card">
+        <h2 className="card-title">Health</h2>
+        {disk == null && device.battery_percent == null ? (
+          <p className="muted small">No health data reported yet.</p>
+        ) : (
+          <div className="health-grid">
+            {disk != null && (
+              <div>
+                <div className="meter-head">
+                  <span>Disk</span>
+                  <span className="muted small">{disk}</span>
+                </div>
+                <div className="meter">
+                  <div className="meter-fill" style={{ width: `${diskUsedPct ?? 0}%` }} />
+                </div>
+              </div>
+            )}
+            {device.battery_percent != null && (
+              <div>
+                <div className="meter-head">
+                  <span>Battery</span>
+                  <span className="muted small">
+                    {device.battery_percent}%
+                    {device.power_plugged != null &&
+                      (device.power_plugged ? " · charging" : " · on battery")}
+                  </span>
+                </div>
+                <div className="meter">
+                  <div
+                    className="meter-fill meter-battery"
+                    style={{ width: `${device.battery_percent}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </section>
+
+      <section className="card">
+        <h2 className="card-title">Application usage (last 7 days)</h2>
+        {!usage || usage.apps.length === 0 ? (
+          <p className="muted small">No usage reported yet.</p>
+        ) : (
+          <>
+            <p className="muted small">
+              Total active time: {formatDuration(usage.total_seconds)}
+            </p>
+            <ul className="usage-list">
+              {usage.apps.slice(0, 12).map((a) => (
+                <li key={a.app_name}>
+                  <div className="usage-row-head">
+                    <span className="usage-app">{a.app_name}</span>
+                    <span className="muted small">{formatDuration(a.seconds)}</span>
+                  </div>
+                  <div className="meter">
+                    <div
+                      className="meter-fill meter-usage"
+                      style={{ width: `${maxUsage ? (a.seconds / maxUsage) * 100 : 0}%` }}
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </section>
+
       <div className="future-grid">
         {FUTURE_SECTIONS.map((s) => (
           <section className="card card-muted" key={s.title}>
             <h2 className="card-title">{s.title}</h2>
-            <p className="muted small">
-              Not collected yet. Arrives in {s.milestone}.
-            </p>
+            <p className="muted small">Not collected yet. Arrives in {s.milestone}.</p>
           </section>
         ))}
       </div>
