@@ -43,6 +43,10 @@ class Device(Base):
         ForeignKey("admins.id", ondelete="SET NULL"), nullable=True
     )
 
+    # Reported by the agent on check-in (Milestone 4+). Null until first report.
+    agent_version: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    os_version: Mapped[str | None] = mapped_column(String(80), nullable=True)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow
     )

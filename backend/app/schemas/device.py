@@ -43,6 +43,8 @@ class DeviceOut(BaseModel):
     created_at: datetime
     updated_at: datetime
     last_seen_at: datetime | None
+    agent_version: str | None = None
+    os_version: str | None = None
 
     @field_serializer("created_at", "updated_at", "last_seen_at")
     def _ser_dt(self, value: datetime | None) -> str | None:

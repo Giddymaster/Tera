@@ -16,9 +16,26 @@ PostgreSQL for production).
   `GET /auth/me`, with per-IP login rate limiting.
 - **Device API** (`app/api/devices.py`) — create / list / get / revoke / delete,
   each guarded by a role-based permission and written to the audit log.
-- **Migrations** (`migrations/`) — Alembic, initial schema generated.
-- **Tests** (`../tests/backend/`) — 27 tests covering auth, authorization,
-  enrollment, validation, rate limiting, and audit logging.
+- **Agent API** (`app/api/agent.py`) — `POST /agent/enroll` (single-use secret →
+  device token) and `POST /agent/heartbeat` (check-in that updates last-seen and
+  reported agent/OS version). Device tokens are a distinct token type and are
+  rejected on admin endpoints; revoked devices are refused.
+- **Audit API** (`app/api/audit.py`) — `GET /audit` for admins with
+  `view_reports`, newest first, paginated.
+- **Migrations** (`migrations/`) — Alembic; initial schema plus a device-health
+  column migration.
+- **Tests** (`../tests/backend/`) — 41 tests covering auth, authorization,
+  device enrollment/heartbeat, token separation, revocation, validation, rate
+  limiting, and audit logging.
+
+## Try the full agent flow
+
+With the server running and a demo admin created, simulate a device enrolling and
+checking in (it will appear "Online" in the dashboard):
+
+```bash
+python scripts/simulate_agent.py --email admin@demo.local --password <password>
+```
 
 ## Setup (Windows PowerShell)
 
@@ -99,4 +116,7 @@ change without touching endpoint code.
 - Rate limiting is in-process memory only; a multi-process deployment needs a
   shared store (e.g. Redis).
 - No MFA yet (planned where practical).
-- Agent-facing enrollment/heartbeat endpoints arrive in Milestone 4.
+- Device tokens are stateless; revocation is via device status, not a per-token
+  blocklist.
+- Heartbeat is exercised by a simulated agent; the real Windows agent is
+  Milestone 5.

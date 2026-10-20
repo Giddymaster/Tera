@@ -97,6 +97,14 @@ export function DeviceDetailPage() {
             <dd className="cap">{device.enrollment_status}</dd>
           </div>
           <div>
+            <dt>Agent version</dt>
+            <dd>{device.agent_version ?? "—"}</dd>
+          </div>
+          <div>
+            <dt>OS version</dt>
+            <dd>{device.os_version ?? "—"}</dd>
+          </div>
+          <div>
             <dt>Registered</dt>
             <dd>{formatDateTime(device.created_at)}</dd>
           </div>

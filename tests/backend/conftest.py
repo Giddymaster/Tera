@@ -25,6 +25,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 from sqlalchemy import create_engine  # noqa: E402
 from sqlalchemy.orm import Session, sessionmaker  # noqa: E402
 
+from app.api.agent import enroll_limiter  # noqa: E402
 from app.api.auth import login_limiter  # noqa: E402
 from app.core.database import Base  # noqa: E402
 from app.core.security import hash_password  # noqa: E402
@@ -43,6 +44,7 @@ def _fresh_db() -> Iterator[None]:
     Base.metadata.drop_all(_sync_engine)
     Base.metadata.create_all(_sync_engine)
     login_limiter.reset()
+    enroll_limiter.reset()
     yield
 
 

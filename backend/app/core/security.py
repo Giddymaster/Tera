@@ -22,7 +22,7 @@ settings = get_settings()
 # Argon2id with library defaults (a modern, memory-hard password hash).
 _hasher = PasswordHasher()
 
-TokenType = Literal["access", "refresh"]
+TokenType = Literal["access", "refresh", "device"]
 
 
 class TokenError(Exception):
@@ -76,6 +76,13 @@ def create_access_token(admin_id: int) -> str:
 def create_refresh_token(admin_id: int) -> str:
     return _create_token(
         str(admin_id), "refresh", timedelta(days=settings.refresh_token_days)
+    )
+
+
+def create_device_token(device_uid: str) -> str:
+    """A long-lived token an enrolled device uses to authenticate check-ins."""
+    return _create_token(
+        device_uid, "device", timedelta(days=settings.device_token_days)
     )
 
 

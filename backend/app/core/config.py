@@ -47,6 +47,11 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_minutes: int = Field(default=15, ge=1)
     refresh_token_days: int = Field(default=7, ge=1)
+    # Long-lived token issued to a device agent at enrollment. Revocation is by
+    # setting the device's enrollment status to "revoked".
+    device_token_days: int = Field(default=365, ge=1)
+    # A device is considered online only if its last heartbeat is this recent.
+    online_threshold_seconds: int = Field(default=300, ge=30)
 
     # Login rate limiting (per client IP).
     login_max_attempts: int = Field(default=5, ge=1)

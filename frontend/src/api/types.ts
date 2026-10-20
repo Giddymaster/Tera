@@ -33,6 +33,19 @@ export interface DeviceOut {
   created_at: string;
   updated_at: string;
   last_seen_at: string | null;
+  agent_version: string | null;
+  os_version: string | null;
+}
+
+export interface AuditLogOut {
+  id: number;
+  timestamp: string;
+  actor_email: string | null;
+  action: string;
+  target_type: string | null;
+  target_id: string | null;
+  detail: string | null;
+  ip_address: string | null;
 }
 
 export interface DeviceCreate {

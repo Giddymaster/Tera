@@ -24,6 +24,21 @@ device telemetry is collected.** The backend stores only:
   contents, or browsing page contents. None of these are collected by any
   component in this milestone, and the project forbids covert collection of them.
 
+## Added in Milestone 4 (device enrollment and heartbeat)
+
+Devices can now enroll and check in. This adds the following, still with no
+employee activity, screenshots, or location collection:
+
+| Data                     | When written                         | Contains                                              | Who can read |
+| ------------------------ | ------------------------------------ | ----------------------------------------------------- | ------------ |
+| Device check-in time     | On each agent heartbeat              | `last_seen_at` timestamp                              | Admins with `view_devices` |
+| Reported device version  | On heartbeat (when the agent sends it) | Agent version, OS version strings                   | Admins with `view_devices` |
+| Enrollment events        | On enroll success/failure            | Device id, client IP, timestamp (no secret stored)   | Admins with `view_reports` |
+
+The heartbeat payload in this milestone carries only the agent version and OS
+version. Richer device health (disk, battery, security status) arrives with the
+Windows agent in Milestone 5 and will be added here then.
+
 ## Future milestones
 
 When agents are added, this table will be extended with: foreground application

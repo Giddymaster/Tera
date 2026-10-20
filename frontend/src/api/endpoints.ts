@@ -3,6 +3,7 @@
 import { apiRequest, tokenStore } from "./client";
 import type {
   AdminOut,
+  AuditLogOut,
   DeviceCreate,
   DeviceCreateResponse,
   DeviceOut,
@@ -40,4 +41,8 @@ export function revokeDevice(deviceUid: string): Promise<DeviceOut> {
 
 export function deleteDevice(deviceUid: string): Promise<void> {
   return apiRequest<void>(`/devices/${deviceUid}`, { method: "DELETE" });
+}
+
+export function listAuditLogs(limit = 100): Promise<AuditLogOut[]> {
+  return apiRequest<AuditLogOut[]>(`/audit?limit=${limit}`);
 }

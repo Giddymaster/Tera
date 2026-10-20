@@ -8,8 +8,8 @@ platform · ❓ feasibility not yet confirmed
 
 | Feature                         | Windows | Android | iOS   | Notes                                              |
 | ------------------------------- | ------- | ------- | ----- | -------------------------------------------------- |
-| Device enrollment / registration | 📋      | ❓      | ❓    | Windows agent first; mobile pending feasibility    |
-| Heartbeat / online status       | 📋      | 📋      | 📋    |                                                    |
+| Device enrollment / registration | 🚧      | ❓      | ❓    | Backend enroll API done + tested via simulated agent; real Windows agent in M5 |
+| Heartbeat / online status       | 🚧      | 📋      | 📋    | Backend heartbeat + live status done + tested via simulated agent              |
 | Device health (OS, disk, battery)| 📋      | ❓      | ❓    |                                                    |
 | Foreground app usage             | 📋      | ❓      | ❌    | iOS MDM does not expose per-app foreground usage   |
 | Policy-controlled screenshots    | 📋      | ❌      | ❌    | Not available via standard Android/iOS MDM         |
