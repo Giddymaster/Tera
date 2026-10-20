@@ -32,14 +32,20 @@ PostgreSQL for production).
 - **Remote support** (`app/api/sessions.py`) — start/end sessions
   (`initiate_live_session`), list sessions, and view a session's snapshots
   (`view_screenshots`).
+- **Android** (`app/api/android.py`, `app/core/android.py`) — Android Management
+  API integration scaffold: `GET /android/status` (capability matrix, always
+  available) plus device list, enrollment token, and commands, gated on
+  configuration (see docs/android-feasibility.md). The live path is untested
+  without a Google project and device.
 - **Audit API** (`app/api/audit.py`) — `GET /audit` for admins with
   `view_reports`, newest first, paginated.
 - **Migrations** (`migrations/`) — Alembic; initial schema plus a device-health
   column migration.
-- **Tests** (`../tests/backend/`) — 62 tests covering auth, authorization,
+- **Tests** (`../tests/backend/`) — 69 tests covering auth, authorization,
   device enrollment/heartbeat, token separation, revocation, device health,
   app-usage, screenshot policy/capture/view/delete, remote sessions, retention,
-  validation, rate limiting, and audit logging.
+  Android status/authorization/not-configured paths, validation, rate limiting,
+  and audit logging.
 
 ## Try the full agent flow
 

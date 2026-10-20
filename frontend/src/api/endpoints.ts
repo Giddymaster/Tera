@@ -3,6 +3,7 @@
 import { apiBlob, apiRequest, tokenStore } from "./client";
 import type {
   AdminOut,
+  AndroidStatus,
   AuditLogOut,
   DeviceCreate,
   DeviceCreateResponse,
@@ -108,4 +109,13 @@ export function endSession(id: number): Promise<RemoteSession> {
 
 export function getSessionScreenshots(id: number): Promise<ScreenshotMeta[]> {
   return apiRequest<ScreenshotMeta[]>(`/sessions/${id}/screenshots`);
+}
+
+// ---- Android management ----
+export function getAndroidStatus(): Promise<AndroidStatus> {
+  return apiRequest<AndroidStatus>("/android/status");
+}
+
+export function getAndroidDevices(): Promise<Record<string, unknown>[]> {
+  return apiRequest<Record<string, unknown>[]>("/android/devices");
 }

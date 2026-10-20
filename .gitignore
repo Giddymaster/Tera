@@ -12,6 +12,11 @@
 secrets/
 enrollment-tokens/
 *.token
+# Google / Android service-account keys
+*service-account*.json
+*-sa.json
+android-sa*.json
+gcp-*.json
 
 # ============================================================
 #  Collected / sensitive runtime data — NEVER commit

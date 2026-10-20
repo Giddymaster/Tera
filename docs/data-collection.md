@@ -89,6 +89,20 @@ strict controls. These are **not** available through ordinary Android or iOS MDM
   snapshots. Full-motion remote control should use an established tool in
   production (e.g. WebRTC, RustDesk, Apache Guacamole).
 
+## Added in Milestone 8 (Android management)
+
+When the Android Management API integration is configured, Android devices are
+managed through Google's Android Device Policy app. Data then available to admins
+with `view_devices` is **device inventory and compliance** (model, OS version,
+security patch level, policy/compliance state) pulled from the API. Admins with
+`manage_devices` can issue AMAPI commands (lock, wipe, reboot, lost mode).
+
+On Android the system does **not** collect screenshots, live screen view,
+foreground app usage, or keystrokes — those are not available through Android MDM
+and are Windows-agent-only features. Location on Android is available **only via
+Lost Mode**, not as continuous tracking. See
+[android-feasibility.md](android-feasibility.md).
+
 ## Future milestones
 
 When agents are added, this table will be extended with: foreground application

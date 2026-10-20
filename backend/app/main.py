@@ -14,7 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app import __version__
-from app.api import agent, audit, auth, devices, screenshots, sessions
+from app.api import agent, android, audit, auth, devices, screenshots, sessions
 from app.core.config import get_settings
 from app.core.database import create_all
 
@@ -73,6 +73,7 @@ def create_app() -> FastAPI:
     app.include_router(audit.router)
     app.include_router(screenshots.router)
     app.include_router(sessions.router)
+    app.include_router(android.router)
 
     @app.get("/health", tags=["meta"])
     async def health() -> dict[str, str]:

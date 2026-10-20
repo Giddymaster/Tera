@@ -6,14 +6,15 @@ iPhones. It provides a central admin dashboard, device enrollment, health and
 activity reporting, policy-controlled screenshots, and authorized remote support.
 
 This project is built incrementally in milestones. **It is currently at
-Milestone 7: screenshots and live remote support.** The backend, a React
-dashboard, and a real Windows agent are tested on Windows 11. The agent reports
-device health and foreground app usage (names and durations), and on Windows can
-capture policy-controlled screenshots and provide authorized live support. There
-is no keylogging, clipboard, window-title, or location capture. Screenshots are
-encrypted at rest, shown with a device notice, access-controlled, and retained per
-policy. See [docs/data-collection.md](docs/data-collection.md) for exactly what is
-stored and the safeguards.
+Milestone 8: Android management.** The backend, a React dashboard, and a real
+Windows agent are tested on Windows 11 (device health, foreground app usage,
+policy-controlled encrypted screenshots, and authorized live support). Milestone 8
+adds a researched Android feasibility assessment and an Android Management API
+integration scaffold with an honest capability matrix; the live Android path needs
+a Google Cloud project and a device and is documented, not yet tested. There is no
+keylogging, clipboard, window-title, screenshot, or app-usage capture on Android.
+See [docs/android-feasibility.md](docs/android-feasibility.md) and
+[docs/data-collection.md](docs/data-collection.md).
 
 ---
 
@@ -124,8 +125,8 @@ You should see the folders listed under *Project structure* above.
 4. ✅ Device registration, heartbeat, status, audit logs
 5. ✅ Windows agent: device health + foreground app usage
 6. ✅ Managed startup, secure updates, agent recovery
-7. **Policy-controlled screenshots + authorized live remote support** ← you are here
-8. Android management feasibility + implementation
+7. ✅ Policy-controlled screenshots + authorized live remote support
+8. **Android management feasibility + implementation** ← you are here
 9. Apple MDM feasibility + implementation
 10. Location features, alerts, reporting
 11. Security review, backups, retention, automated tests

@@ -87,6 +87,14 @@ export interface RemoteSession {
   end_reason: string | null;
 }
 
+export interface AndroidStatus {
+  configured: boolean;
+  project_id: string | null;
+  enterprise_name: string | null;
+  capabilities: Record<string, boolean | string>;
+  commands: string[];
+}
+
 export interface AuditLogOut {
   id: number;
   timestamp: string;

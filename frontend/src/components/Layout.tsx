@@ -25,6 +25,9 @@ export function Layout() {
             <NavLink to="/activity" className="nav-link">
               Activity
             </NavLink>
+            <NavLink to="/android" className="nav-link">
+              Android
+            </NavLink>
           </nav>
           <div className="topbar-right">
             {admin && (

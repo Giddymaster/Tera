@@ -63,6 +63,13 @@ class Settings(BaseSettings):
     max_screenshot_bytes: int = Field(default=3_000_000, ge=10_000)
     # How often the agent captures while a live-support session is active.
     session_capture_interval_seconds: int = Field(default=4, ge=1)
+
+    # ---- Android management (Milestone 8) ----
+    # All three must be set to activate the Android Management API integration.
+    # See docs/android-feasibility.md. Left blank by default (feature inactive).
+    android_project_id: str = ""
+    android_enterprise_name: str = ""  # e.g. "enterprises/LC0123456789"
+    android_sa_json: str = ""  # path to a service-account JSON key, or inline JSON
     # A device is considered online only if its last heartbeat is this recent.
     online_threshold_seconds: int = Field(default=300, ge=30)
 
