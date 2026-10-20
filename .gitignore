@@ -1,0 +1,77 @@
+# ============================================================
+#  Secrets and environment — NEVER commit these
+# ============================================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+*.mobileconfig
+secrets/
+enrollment-tokens/
+*.token
+
+# ============================================================
+#  Collected / sensitive runtime data — NEVER commit
+# ============================================================
+screenshots/
+captures/
+uploads/
+backups/
+*.sqlite
+*.sqlite3
+*.db
+
+# ============================================================
+#  Python (backend, windows-agent)
+# ============================================================
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# ============================================================
+#  Node / frontend
+# ============================================================
+node_modules/
+frontend/dist/
+frontend/.vite/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ============================================================
+#  Docker / deployment
+# ============================================================
+docker-compose.override.yml
+
+# ============================================================
+#  Editors / OS
+# ============================================================
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============================================================
+#  Windows agent build output
+# ============================================================
+windows-agent/dist/
+windows-agent/build/
+*.spec
