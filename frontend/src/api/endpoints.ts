@@ -1,6 +1,6 @@
 // Typed endpoint functions built on the api client.
 
-import { apiRequest, tokenStore } from "./client";
+import { apiBlob, apiRequest, tokenStore } from "./client";
 import type {
   AdminOut,
   AuditLogOut,
@@ -9,6 +9,9 @@ import type {
   DeviceOut,
   DeviceUsageOut,
   MetaInfo,
+  RemoteSession,
+  ScreenshotMeta,
+  ScreenshotPolicy,
   TokenResponse,
 } from "./types";
 
@@ -55,4 +58,54 @@ export function getDeviceUsage(deviceUid: string, days = 7): Promise<DeviceUsage
 
 export function getMeta(): Promise<MetaInfo> {
   return apiRequest<MetaInfo>("/meta", { auth: false });
+}
+
+// ---- Screenshots ----
+export function getScreenshotPolicy(uid: string): Promise<ScreenshotPolicy> {
+  return apiRequest<ScreenshotPolicy>(`/devices/${uid}/screenshot-policy`);
+}
+
+export function updateScreenshotPolicy(
+  uid: string,
+  policy: ScreenshotPolicy,
+): Promise<ScreenshotPolicy> {
+  return apiRequest<ScreenshotPolicy>(`/devices/${uid}/screenshot-policy`, {
+    method: "PUT",
+    body: policy,
+  });
+}
+
+export function requestCapture(uid: string): Promise<{ status: string }> {
+  return apiRequest<{ status: string }>(`/devices/${uid}/screenshots/request`, {
+    method: "POST",
+  });
+}
+
+export function listScreenshots(uid: string, limit = 50): Promise<ScreenshotMeta[]> {
+  return apiRequest<ScreenshotMeta[]>(`/devices/${uid}/screenshots?limit=${limit}`);
+}
+
+export function deleteScreenshot(id: number): Promise<void> {
+  return apiRequest<void>(`/screenshots/${id}`, { method: "DELETE" });
+}
+
+export function getScreenshotImage(id: number): Promise<Blob> {
+  return apiBlob(`/screenshots/${id}/image`);
+}
+
+// ---- Remote support sessions ----
+export function startSession(uid: string): Promise<RemoteSession> {
+  return apiRequest<RemoteSession>(`/devices/${uid}/sessions`, { method: "POST" });
+}
+
+export function listSessions(uid: string): Promise<RemoteSession[]> {
+  return apiRequest<RemoteSession[]>(`/devices/${uid}/sessions`);
+}
+
+export function endSession(id: number): Promise<RemoteSession> {
+  return apiRequest<RemoteSession>(`/sessions/${id}/end`, { method: "POST" });
+}
+
+export function getSessionScreenshots(id: number): Promise<ScreenshotMeta[]> {
+  return apiRequest<ScreenshotMeta[]>(`/sessions/${id}/screenshots`);
 }

@@ -24,13 +24,22 @@ PostgreSQL for production).
   endpoints; revoked devices are refused.
 - **Usage view** — `GET /devices/{uid}/usage` (admins with `view_reports`)
   returns per-app totals over a window of days.
+- **Screenshots** (`app/api/screenshots.py`, `app/api/agent.py`) — per-device
+  policy (`manage_security_policy` to change), capture requests, `GET /agent/
+  directives` + `POST /agent/screenshot` for the device, and list/view/delete for
+  admins with `view_screenshots`. Images are encrypted at rest and retained per
+  policy.
+- **Remote support** (`app/api/sessions.py`) — start/end sessions
+  (`initiate_live_session`), list sessions, and view a session's snapshots
+  (`view_screenshots`).
 - **Audit API** (`app/api/audit.py`) — `GET /audit` for admins with
   `view_reports`, newest first, paginated.
 - **Migrations** (`migrations/`) — Alembic; initial schema plus a device-health
   column migration.
-- **Tests** (`../tests/backend/`) — 47 tests covering auth, authorization,
+- **Tests** (`../tests/backend/`) — 62 tests covering auth, authorization,
   device enrollment/heartbeat, token separation, revocation, device health,
-  app-usage reporting/aggregation, validation, rate limiting, and audit logging.
+  app-usage, screenshot policy/capture/view/delete, remote sessions, retention,
+  validation, rate limiting, and audit logging.
 
 ## Try the full agent flow
 

@@ -8,12 +8,29 @@ a company-owned laptop and reports:
   it is used, aggregated per app per day. Idle time (no keyboard/mouse) is not
   counted.
 
+It can also capture **screenshots** and act as the device side of a **live
+remote-support session**, but only under the controls described below.
+
 ## What it does NOT collect
 
 By design, the agent never records keystrokes, clipboard contents, window titles,
-URLs, page contents, screenshots, microphone, or any file contents. It reports
+URLs, page contents, microphone, or any file contents. For app usage it reports
 application names and durations only. A monitoring notice is printed when it
 starts.
+
+## Screenshots and remote support (Milestone 7)
+
+- Screenshots are captured **only** when the per-device policy (set by an admin in
+  the dashboard) enables them, when an admin requests one, or while a live-support
+  session is active. When monitoring is disabled, nothing is captured.
+- Images are downscaled and compressed, sent to the backend, and **encrypted at
+  rest** there. The agent keeps no local copy.
+- An **excluded-apps** list in the policy skips capture while those apps are in
+  the foreground (best-effort privacy for password managers etc.).
+- During a live session the agent logs a visible **"session active"** notice each
+  cycle, naming that an administrator is viewing the screen.
+- Live support is **authorized near-live snapshots**, not full-motion video and
+  not remote control. These need a desktop session; they do nothing headless.
 
 ## Requirements
 

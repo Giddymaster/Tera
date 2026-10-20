@@ -113,4 +113,20 @@ export async function apiRequest<T>(
   return (await res.json()) as T;
 }
 
+// Fetch a binary response (e.g. a screenshot image) with the same auth and
+// one-time refresh behavior as apiRequest.
+export async function apiBlob(path: string, _retry = true): Promise<Blob> {
+  const headers: Record<string, string> = {};
+  if (tokenStore.access) headers["Authorization"] = `Bearer ${tokenStore.access}`;
+  const res = await fetch(`${BASE_URL}${path}`, { headers });
+  if (res.status === 401 && _retry) {
+    if (await tryRefresh()) return apiBlob(path, false);
+    tokenStore.clear();
+    onAuthError?.();
+    throw new ApiError(401, "Not authenticated");
+  }
+  if (!res.ok) throw await parseError(res);
+  return res.blob();
+}
+
 export { BASE_URL };

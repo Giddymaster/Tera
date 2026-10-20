@@ -58,6 +58,35 @@ export interface MetaInfo {
   latest_agent_version: string;
 }
 
+export interface ScreenshotPolicy {
+  enabled: boolean;
+  interval_minutes: number;
+  active_hour_start: number | null;
+  active_hour_end: number | null;
+  retention_days: number;
+  excluded_apps: string | null;
+}
+
+export interface ScreenshotMeta {
+  id: number;
+  captured_at: string;
+  trigger: string;
+  session_id: number | null;
+  foreground_app: string | null;
+  width: number;
+  height: number;
+  size_bytes: number;
+}
+
+export interface RemoteSession {
+  id: number;
+  status: string;
+  initiated_by_email: string | null;
+  started_at: string;
+  ended_at: string | null;
+  end_reason: string | null;
+}
+
 export interface AuditLogOut {
   id: number;
   timestamp: string;

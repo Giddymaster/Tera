@@ -8,6 +8,7 @@ exactly what the app reads back).
 
 from __future__ import annotations
 
+import base64
 import os
 import tempfile
 from collections.abc import Iterator
@@ -19,6 +20,9 @@ _DB_PATH = Path(_TMP_DIR) / "test.db"
 os.environ["APP_ENV"] = "development"
 os.environ["JWT_SECRET"] = "test-secret-fixed-value-for-deterministic-tokens"
 os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{_DB_PATH.as_posix()}"
+# Fixed Fernet key (urlsafe base64 of 32 bytes) and an isolated screenshot dir.
+os.environ["SCREENSHOT_KEY"] = base64.urlsafe_b64encode(b"0" * 32).decode()
+os.environ["SCREENSHOT_DIR"] = str(Path(_TMP_DIR) / "screenshots")
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402

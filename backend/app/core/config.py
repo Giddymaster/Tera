@@ -53,6 +53,16 @@ class Settings(BaseSettings):
     # The latest published agent version. Agents compare their own version to
     # this on check-in so admins can see which devices need an update.
     agent_latest_version: str = "0.6.0"
+
+    # ---- Screenshots / remote support (Milestone 7) ----
+    # Fernet key (urlsafe base64, 32 bytes) used to encrypt screenshots at rest.
+    # Required in production; a temporary key is generated in development (images
+    # captured before a restart become undecryptable, which is fine for dev).
+    screenshot_key: str = ""
+    screenshot_dir: str = "./screenshots"
+    max_screenshot_bytes: int = Field(default=3_000_000, ge=10_000)
+    # How often the agent captures while a live-support session is active.
+    session_capture_interval_seconds: int = Field(default=4, ge=1)
     # A device is considered online only if its last heartbeat is this recent.
     online_threshold_seconds: int = Field(default=300, ge=30)
 
@@ -87,6 +97,27 @@ class Settings(BaseSettings):
             warnings.warn(
                 "JWT_SECRET is not set; using a temporary development secret. "
                 "Tokens will be invalidated when the server restarts.",
+                stacklevel=2,
+            )
+
+        if not self.screenshot_key:
+            if self.is_production:
+                raise ValueError(
+                    "SCREENSHOT_KEY must be set in production. Generate one with: "
+                    'python -c "import base64,os; '
+                    "print(base64.urlsafe_b64encode(os.urandom(32)).decode())\""
+                )
+            import base64
+            import os as _os
+
+            object.__setattr__(
+                self,
+                "screenshot_key",
+                base64.urlsafe_b64encode(_os.urandom(32)).decode(),
+            )
+            warnings.warn(
+                "SCREENSHOT_KEY is not set; using a temporary development key. "
+                "Screenshots captured before a restart will not be decryptable.",
                 stacklevel=2,
             )
         return self

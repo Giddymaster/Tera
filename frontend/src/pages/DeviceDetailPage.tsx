@@ -3,6 +3,8 @@ import { Link, useParams } from "react-router-dom";
 import { ApiError } from "../api/client";
 import { getDevice, getDeviceUsage, getMeta } from "../api/endpoints";
 import type { DeviceOut, DeviceUsageOut, MetaInfo } from "../api/types";
+import { RemoteSupportPanel } from "../components/RemoteSupportPanel";
+import { ScreenshotsPanel } from "../components/ScreenshotsPanel";
 import { StatusBadge } from "../components/StatusBadge";
 import { computeStatus } from "../lib/deviceStatus";
 import { formatDateTime, formatDuration, relativeTime } from "../lib/format";
@@ -14,10 +16,7 @@ const OS_LABEL: Record<string, string> = {
 };
 
 // Sections populated in later milestones.
-const FUTURE_SECTIONS = [
-  { title: "Screenshots & sessions", milestone: "Milestone 7" },
-  { title: "Location", milestone: "Milestone 10" },
-];
+const FUTURE_SECTIONS = [{ title: "Location", milestone: "Milestone 10" }];
 
 function diskLabel(device: DeviceOut): string | null {
   if (device.disk_free_gb == null || device.disk_total_gb == null) return null;
@@ -216,6 +215,9 @@ export function DeviceDetailPage() {
           </>
         )}
       </section>
+
+      <ScreenshotsPanel deviceUid={device.device_uid} />
+      <RemoteSupportPanel deviceUid={device.device_uid} />
 
       <div className="future-grid">
         {FUTURE_SECTIONS.map((s) => (

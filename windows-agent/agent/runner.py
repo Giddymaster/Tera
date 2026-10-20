@@ -8,11 +8,14 @@ Reliability:
 
 from __future__ import annotations
 
+import base64
 import logging
 import time
+from datetime import datetime
 from pathlib import Path
 
 from . import AGENT_VERSION
+from .capture import capture_jpeg
 from .client import ApiClient, EnrollError
 from .config import load_config
 from .foreground import foreground_process_name, idle_seconds
@@ -36,6 +39,19 @@ NOTICE = (
 
 def _state_path(config_path: str) -> Path:
     return Path(config_path).resolve().parent / ".agent_state.json"
+
+
+def _within_active_hours(start: int | None, end: int | None) -> bool:
+    """True if the current local hour is within [start, end). None = always."""
+    if start is None or end is None:
+        return True
+    hour = datetime.now().hour
+    if start == end:
+        return True
+    if start < end:
+        return start <= hour < end
+    # Window wraps past midnight (e.g. 22 -> 6).
+    return hour >= start or hour < end
 
 
 def run(config_path: str = "config.json") -> int:
@@ -65,6 +81,24 @@ def run(config_path: str = "config.json") -> int:
     interval = cfg.sample_interval_seconds
     last_heartbeat = 0.0
     last_flush = time.monotonic()
+
+    # Screenshot / session state.
+    directives: dict = {}
+    last_directives_poll = 0.0
+    last_scheduled_capture = 0.0
+    last_session_capture = 0.0
+
+    def do_capture(trigger: str, session_id: int | None = None) -> None:
+        shot = capture_jpeg()
+        if shot is None:
+            log.info("Screenshot capture unavailable on this session.")
+            return
+        data, width, height = shot
+        b64 = base64.b64encode(data).decode()
+        ok = client.upload_screenshot(
+            token, b64, trigger, foreground_process_name(), session_id, width, height
+        )
+        log.info("Screenshot (%s) %s", trigger, "uploaded" if ok else "failed")
 
     def flush_usage() -> None:
         nonlocal pending
@@ -119,6 +153,47 @@ def run(config_path: str = "config.json") -> int:
                 if now - last_flush >= cfg.usage_flush_interval_seconds:
                     flush_usage()
                     last_flush = now
+
+                # Refresh directives (policy, capture requests, active session).
+                if not directives or now - last_directives_poll >= 15:
+                    fresh = client.get_directives(token)
+                    if fresh is not None:
+                        directives = fresh
+                    last_directives_poll = now
+
+                policy = directives.get("screenshot_policy") or {}
+                fg = foreground_process_name()
+                excluded = {a.lower() for a in policy.get("excluded_apps", [])}
+                fg_excluded = bool(fg and fg.lower() in excluded)
+
+                # On-demand capture requested by an admin.
+                if directives.get("capture_requested") and not fg_excluded:
+                    do_capture("request")
+                    directives["capture_requested"] = False
+                    last_directives_poll = now - 12  # re-check soon
+
+                # Scheduled capture per policy.
+                if policy.get("enabled") and not fg_excluded:
+                    interval_s = max(1, int(policy.get("interval_minutes", 15))) * 60
+                    if now - last_scheduled_capture >= interval_s and _within_active_hours(
+                        policy.get("active_hour_start"), policy.get("active_hour_end")
+                    ):
+                        do_capture("schedule")
+                        last_scheduled_capture = now
+
+                # Active live-support session: near-live snapshots + consent notice.
+                if directives.get("session_active"):
+                    sid = directives.get("session_id")
+                    sci = directives.get("session_capture_interval_seconds", 4)
+                    if now - last_session_capture >= sci:
+                        log.warning(
+                            "LIVE SUPPORT SESSION ACTIVE (id=%s): your screen is being "
+                            "viewed by an administrator.",
+                            sid,
+                        )
+                        if not fg_excluded:
+                            do_capture("session", sid)
+                        last_session_capture = now
             except Exception:  # noqa: BLE001 - keep running through transient errors
                 log.exception("Error during agent cycle; continuing.")
     except KeyboardInterrupt:

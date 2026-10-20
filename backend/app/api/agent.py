@@ -7,18 +7,26 @@ act as an admin and vice versa.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+import base64
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, HTTPException, Request, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from app.api.deps import CurrentDevice, SessionDep, client_ip
 from app.core.audit import record_action
 from app.core.config import get_settings
 from app.core.rate_limit import SlidingWindowLimiter
+from app.core.screenshots import delete_expired, save_encrypted
 from app.core.security import create_device_token, verify_secret
 from app.models.device import Device
 from app.models.enums import EnrollmentStatus
+from app.models.monitoring import (
+    CaptureRequest,
+    RemoteSession,
+    Screenshot,
+    ScreenshotPolicy,
+)
 from app.models.usage import AppUsage
 from app.schemas.agent import (
     EnrollRequest,
@@ -27,6 +35,12 @@ from app.schemas.agent import (
     HeartbeatResponse,
 )
 from app.schemas.device import DeviceOut
+from app.schemas.monitoring import (
+    DirectivePolicy,
+    DirectivesOut,
+    ScreenshotOut,
+    ScreenshotUploadIn,
+)
 from app.schemas.usage import UsageReportRequest
 
 settings = get_settings()
@@ -160,3 +174,115 @@ async def report_usage(
         else:
             existing.seconds += entry.seconds
     await session.commit()
+
+
+@router.get("/directives", response_model=DirectivesOut)
+async def directives(session: SessionDep, device: CurrentDevice):
+    """Tell the agent what to do now: screenshot policy, pending captures, and
+    whether a live-support session is active."""
+    policy = await session.scalar(
+        select(ScreenshotPolicy).where(ScreenshotPolicy.device_id == device.id)
+    )
+    pending = await session.scalar(
+        select(func.count())
+        .select_from(CaptureRequest)
+        .where(
+            CaptureRequest.device_id == device.id,
+            CaptureRequest.fulfilled_at.is_(None),
+        )
+    )
+    active = await session.scalar(
+        select(RemoteSession)
+        .where(RemoteSession.device_id == device.id, RemoteSession.status == "active")
+        .order_by(RemoteSession.started_at.desc())
+    )
+    excluded = [
+        a.strip()
+        for a in ((policy.excluded_apps or "").split(",") if policy else [])
+        if a.strip()
+    ]
+    dp = DirectivePolicy(
+        enabled=policy.enabled if policy else False,
+        interval_minutes=policy.interval_minutes if policy else 15,
+        active_hour_start=policy.active_hour_start if policy else None,
+        active_hour_end=policy.active_hour_end if policy else None,
+        excluded_apps=excluded,
+    )
+    return DirectivesOut(
+        screenshot_policy=dp,
+        capture_requested=bool(pending),
+        session_active=active is not None,
+        session_id=active.id if active else None,
+        session_capture_interval_seconds=settings.session_capture_interval_seconds,
+    )
+
+
+@router.post(
+    "/screenshot", response_model=ScreenshotOut, status_code=status.HTTP_201_CREATED
+)
+async def upload_screenshot(
+    payload: ScreenshotUploadIn, session: SessionDep, device: CurrentDevice
+):
+    try:
+        raw = base64.b64decode(payload.image_base64, validate=True)
+    except Exception:  # noqa: BLE001 - any decode error is a bad request
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid image encoding"
+        ) from None
+    if not raw:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Empty image"
+        )
+    if len(raw) > settings.max_screenshot_bytes:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="Screenshot too large",
+        )
+
+    policy = await session.scalar(
+        select(ScreenshotPolicy).where(ScreenshotPolicy.device_id == device.id)
+    )
+    retention_days = policy.retention_days if policy else 30
+
+    requested_by = None
+    if payload.trigger == "request":
+        req = await session.scalar(
+            select(CaptureRequest)
+            .where(
+                CaptureRequest.device_id == device.id,
+                CaptureRequest.fulfilled_at.is_(None),
+            )
+            .order_by(CaptureRequest.created_at.asc())
+        )
+        if req is not None:
+            req.fulfilled_at = datetime.now(timezone.utc)
+            requested_by = req.requested_by_admin_id
+
+    session_id = None
+    if payload.trigger == "session" and payload.session_id is not None:
+        sess = await session.get(RemoteSession, payload.session_id)
+        if sess is not None and sess.device_id == device.id and sess.status == "active":
+            session_id = sess.id
+
+    storage_path = save_encrypted(device.device_uid, raw)
+    now = datetime.now(timezone.utc)
+    shot = Screenshot(
+        device_id=device.id,
+        captured_at=now,
+        trigger=payload.trigger,
+        requested_by_admin_id=requested_by,
+        session_id=session_id,
+        foreground_app=payload.foreground_app,
+        width=payload.width,
+        height=payload.height,
+        size_bytes=len(raw),
+        storage_path=storage_path,
+        retention_until=now + timedelta(days=retention_days),
+    )
+    session.add(shot)
+    await session.commit()
+    await session.refresh(shot)
+
+    # Opportunistically purge anything past its retention window.
+    await delete_expired(session)
+    return ScreenshotOut.model_validate(shot)

@@ -14,15 +14,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app import __version__
-from app.api import agent, audit, auth, devices
+from app.api import agent, audit, auth, devices, screenshots, sessions
 from app.core.config import get_settings
 from app.core.database import create_all
 
 settings = get_settings()
 
-# Reject oversized request bodies early. JSON endpoints here are tiny; large
-# uploads (e.g. screenshots in a later milestone) will use their own limit.
-MAX_REQUEST_BYTES = 1_000_000  # 1 MB
+# Reject oversized request bodies early. Most endpoints are tiny (1 MB cap); the
+# one large payload is the screenshot upload, which gets a higher cap (base64
+# inflates bytes by ~1.37x, plus JSON overhead).
+MAX_REQUEST_BYTES = 1_000_000  # 1 MB default
+SCREENSHOT_UPLOAD_PATH = "/agent/screenshot"
+MAX_SCREENSHOT_REQUEST_BYTES = int(settings.max_screenshot_bytes * 1.6)
 
 
 @asynccontextmanager
@@ -51,8 +54,13 @@ def create_app() -> FastAPI:
 
     @app.middleware("http")
     async def limit_body_size(request: Request, call_next):
+        limit = (
+            MAX_SCREENSHOT_REQUEST_BYTES
+            if request.url.path == SCREENSHOT_UPLOAD_PATH
+            else MAX_REQUEST_BYTES
+        )
         content_length = request.headers.get("content-length")
-        if content_length is not None and int(content_length) > MAX_REQUEST_BYTES:
+        if content_length is not None and int(content_length) > limit:
             return JSONResponse(
                 status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                 content={"detail": "Request body too large"},
@@ -63,6 +71,8 @@ def create_app() -> FastAPI:
     app.include_router(devices.router)
     app.include_router(agent.router)
     app.include_router(audit.router)
+    app.include_router(screenshots.router)
+    app.include_router(sessions.router)
 
     @app.get("/health", tags=["meta"])
     async def health() -> dict[str, str]:

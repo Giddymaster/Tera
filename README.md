@@ -6,14 +6,14 @@ iPhones. It provides a central admin dashboard, device enrollment, health and
 activity reporting, policy-controlled screenshots, and authorized remote support.
 
 This project is built incrementally in milestones. **It is currently at
-Milestone 6: managed startup, recovery, and updates.** The backend, a React
-dashboard, and a real Windows agent exist and are tested on Windows 11. The agent
-reports device health and foreground application usage (app names and durations
-only), auto-starts at logon via a visible scheduled task, recovers from crashes,
-and reports its version so admins see which devices need updating. No screenshots
-or location data is collected, and there is no keylogging, clipboard, or
-window-title capture. See [docs/data-collection.md](docs/data-collection.md) for
-exactly what is stored.
+Milestone 7: screenshots and live remote support.** The backend, a React
+dashboard, and a real Windows agent are tested on Windows 11. The agent reports
+device health and foreground app usage (names and durations), and on Windows can
+capture policy-controlled screenshots and provide authorized live support. There
+is no keylogging, clipboard, window-title, or location capture. Screenshots are
+encrypted at rest, shown with a device notice, access-controlled, and retained per
+policy. See [docs/data-collection.md](docs/data-collection.md) for exactly what is
+stored and the safeguards.
 
 ---
 
@@ -123,8 +123,8 @@ You should see the folders listed under *Project structure* above.
 3. ✅ React dashboard with simulated devices
 4. ✅ Device registration, heartbeat, status, audit logs
 5. ✅ Windows agent: device health + foreground app usage
-6. **Managed startup, secure updates, agent recovery** ← you are here
-7. Policy-controlled screenshots + authorized live remote support
+6. ✅ Managed startup, secure updates, agent recovery
+7. **Policy-controlled screenshots + authorized live remote support** ← you are here
 8. Android management feasibility + implementation
 9. Apple MDM feasibility + implementation
 10. Location features, alerts, reporting

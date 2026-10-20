@@ -85,5 +85,44 @@ class ApiClient:
         except httpx.HTTPError:
             return False
 
+    def get_directives(self, token: str) -> dict | None:
+        try:
+            resp = self._http.get(
+                f"{self.base_url}/agent/directives", headers=self._auth(token)
+            )
+        except httpx.HTTPError:
+            return None
+        if resp.status_code != 200:
+            return None
+        return resp.json()
+
+    def upload_screenshot(
+        self,
+        token: str,
+        image_base64: str,
+        trigger: str,
+        foreground_app: str | None,
+        session_id: int | None,
+        width: int,
+        height: int,
+    ) -> bool:
+        try:
+            resp = self._http.post(
+                f"{self.base_url}/agent/screenshot",
+                json={
+                    "image_base64": image_base64,
+                    "trigger": trigger,
+                    "foreground_app": foreground_app,
+                    "session_id": session_id,
+                    "width": width,
+                    "height": height,
+                },
+                headers=self._auth(token),
+                timeout=30.0,
+            )
+            return resp.status_code in (200, 201)
+        except httpx.HTTPError:
+            return False
+
     def close(self) -> None:
         self._http.close()

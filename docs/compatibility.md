@@ -15,8 +15,8 @@ platform · ❓ feasibility not yet confirmed
 | Managed startup (auto-start)     | ✅      | 📋      | 📋    | Windows: visible per-user logon task, no admin needed (tested)                 |
 | Agent crash recovery             | ✅      | 📋      | 📋    | Windows: supervisor restarts with backoff (tested)                             |
 | Secure updates                   | 🚧      | 📋      | 📋    | Version reporting + "update available" done; auto self-update not yet          |
-| Policy-controlled screenshots    | 📋      | ❌      | ❌    | Not available via standard Android/iOS MDM         |
-| Authorized live remote support   | 📋      | ❓      | ❌    | Use an established, maintained remote-support tech |
+| Policy-controlled screenshots    | ✅      | ❌      | ❌    | Windows agent: scheduled/on-request, encrypted, retained (tested). Not via Android/iOS MDM |
+| Authorized live remote support   | ✅      | ❌      | ❌    | Windows: authorized near-live snapshots + consent indicator (tested). Full-motion: integrate WebRTC/RustDesk |
 | Location                         | ❓      | ❓      | ❓    | Depends on enrollment model / permissions          |
 | Remote lock / wipe               | ❓      | ❓      | ❓    | Requires supported MDM enrollment                  |
 

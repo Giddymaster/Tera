@@ -56,6 +56,39 @@ screenshots, microphone, and file contents are never collected. Time while the
 user is idle (no keyboard/mouse past a threshold) is not counted. The agent
 prints a monitoring notice when it starts and identifies itself by agent version.
 
+## Added in Milestone 7 (screenshots and live remote support)
+
+Screenshots and live-support snapshots can now be captured on **Windows**, under
+strict controls. These are **not** available through ordinary Android or iOS MDM.
+
+| Data                     | When written                                              | Contains                                      | Who can read |
+| ------------------------ | --------------------------------------------------------- | --------------------------------------------- | ------------ |
+| Screenshots              | On the configured schedule, on admin request, or during a session | A compressed JPEG of the screen             | Admins with `view_screenshots` |
+| Screenshot metadata      | With each screenshot                                      | Timestamp, trigger, requesting admin, foreground app name, size | Admins with `view_screenshots` |
+| Remote session records   | On start/end                                              | Who initiated, start/end times, end reason    | Admins with `view_devices` |
+
+### Controls and safeguards
+
+- Screenshots are **encrypted at rest** (Fernet/AES) and only decrypted when an
+  authorized admin views them. They are never written to disk in the clear and
+  never exposed through an unauthenticated URL.
+- Capture happens **only** when the per-device policy allows it (enabled, within
+  active hours) or an authorized admin requests it or a session is active. When
+  monitoring is disabled, nothing is captured.
+- A **monitoring notice** is shown by the agent, and during a live session the
+  agent displays a visible "session active" indicator naming that an admin is
+  viewing.
+- **Retention** is configurable per device; screenshots are permanently deleted
+  after their retention period (opportunistically and via a cleanup task), and
+  admins can delete any screenshot immediately.
+- Images are **size-limited** (downscaled, compressed, capped bytes).
+- Password fields cannot be reliably detected automatically; a per-device
+  **excluded-apps** list skips capture while those apps are in the foreground.
+- Live support uses authenticated, encrypted **near-live snapshots**, not a
+  custom streaming protocol. Sessions are **not recorded** beyond the retained
+  snapshots. Full-motion remote control should use an established tool in
+  production (e.g. WebRTC, RustDesk, Apache Guacamole).
+
 ## Future milestones
 
 When agents are added, this table will be extended with: foreground application
