@@ -20,6 +20,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from agent.runner import run  # noqa: E402
+from agent.supervisor import supervise  # noqa: E402
 
 
 def main() -> int:
@@ -27,6 +28,12 @@ def main() -> int:
     parser.add_argument("--config", default="config.json", help="path to config.json")
     parser.add_argument(
         "--log-file", default="agent.log", help="path to the agent log file"
+    )
+    parser.add_argument(
+        "--supervise",
+        action="store_true",
+        help="auto-restart the agent if it exits unexpectedly (used by the "
+        "installed logon task)",
     )
     args = parser.parse_args()
 
@@ -38,6 +45,8 @@ def main() -> int:
             logging.FileHandler(args.log_file, encoding="utf-8"),
         ],
     )
+    if args.supervise:
+        return supervise(args.config)
     return run(args.config)
 
 

@@ -5,4 +5,4 @@ durations only) and reports them to the management backend. It does NOT record
 keystrokes, clipboard contents, window titles, URLs, or page contents.
 """
 
-AGENT_VERSION = "0.5.0"
+AGENT_VERSION = "0.6.0"

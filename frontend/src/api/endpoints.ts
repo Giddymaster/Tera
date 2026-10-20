@@ -8,6 +8,7 @@ import type {
   DeviceCreateResponse,
   DeviceOut,
   DeviceUsageOut,
+  MetaInfo,
   TokenResponse,
 } from "./types";
 
@@ -50,4 +51,8 @@ export function listAuditLogs(limit = 100): Promise<AuditLogOut[]> {
 
 export function getDeviceUsage(deviceUid: string, days = 7): Promise<DeviceUsageOut> {
   return apiRequest<DeviceUsageOut>(`/devices/${deviceUid}/usage?days=${days}`);
+}
+
+export function getMeta(): Promise<MetaInfo> {
+  return apiRequest<MetaInfo>("/meta", { auth: false });
 }

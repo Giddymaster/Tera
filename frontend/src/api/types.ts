@@ -53,6 +53,11 @@ export interface DeviceUsageOut {
   apps: AppUsageOut[];
 }
 
+export interface MetaInfo {
+  server_version: string;
+  latest_agent_version: string;
+}
+
 export interface AuditLogOut {
   id: number;
   timestamp: string;

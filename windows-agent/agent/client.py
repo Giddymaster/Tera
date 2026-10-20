@@ -7,6 +7,8 @@ because it is a one-time setup step.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import httpx
 
 from . import AGENT_VERSION
@@ -14,6 +16,19 @@ from . import AGENT_VERSION
 
 class EnrollError(Exception):
     pass
+
+
+@dataclass
+class HeartbeatResult:
+    ok: bool
+    status: int  # HTTP status, or 0 if the request never completed
+    update_available: bool = False
+    latest_version: str | None = None
+
+    @property
+    def revoked(self) -> bool:
+        # A previously valid device token being rejected means access was revoked.
+        return self.status == 401
 
 
 class ApiClient:
@@ -37,7 +52,7 @@ class ApiClient:
             raise EnrollError(f"Enrollment rejected ({resp.status_code}).")
         return resp.json()["device_token"]
 
-    def heartbeat(self, token: str, health: dict) -> bool:
+    def heartbeat(self, token: str, health: dict) -> HeartbeatResult:
         payload = {"agent_version": AGENT_VERSION, **health}
         try:
             resp = self._http.post(
@@ -45,9 +60,17 @@ class ApiClient:
                 json=payload,
                 headers=self._auth(token),
             )
-            return resp.status_code == 200
         except httpx.HTTPError:
-            return False
+            return HeartbeatResult(ok=False, status=0)
+        if resp.status_code != 200:
+            return HeartbeatResult(ok=False, status=resp.status_code)
+        data = resp.json()
+        return HeartbeatResult(
+            ok=True,
+            status=200,
+            update_available=bool(data.get("update_available")),
+            latest_version=data.get("latest_agent_version"),
+        )
 
     def report_usage(self, token: str, entries: list[dict]) -> bool:
         if not entries:

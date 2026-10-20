@@ -79,24 +79,48 @@ def run(config_path: str = "config.json") -> int:
             log.warning("Usage report failed; queued %d app(s) for retry.", len(combined))
         state.save_pending_usage(pending)
 
+    update_notified = False
+
+    def do_heartbeat() -> bool:
+        """Send a heartbeat. Returns False if the device has been revoked."""
+        nonlocal update_notified
+        result = client.heartbeat(token, collect_health())
+        if result.revoked:
+            log.warning("Access revoked by the server; the agent will stop.")
+            return False
+        if not result.ok:
+            log.info("Heartbeat failed (will retry next cycle).")
+            return True
+        if result.update_available and not update_notified:
+            log.warning(
+                "A newer agent version (%s) is available; this agent is %s. "
+                "An administrator can update it.",
+                result.latest_version,
+                AGENT_VERSION,
+            )
+            update_notified = True
+        return True
+
     try:
-        # Send an immediate first heartbeat so the device shows online quickly.
-        if client.heartbeat(token, collect_health()):
-            log.info("Initial heartbeat sent.")
+        # Immediate first heartbeat so the device shows online quickly.
+        if not do_heartbeat():
+            return 2  # revoked -> do not let the supervisor restart us
         last_heartbeat = time.monotonic()
 
         while True:
             time.sleep(interval)
-            tracker.sample(interval, foreground_process_name(), idle_seconds())
-
-            now = time.monotonic()
-            if now - last_heartbeat >= cfg.heartbeat_interval_seconds:
-                ok = client.heartbeat(token, collect_health())
-                log.info("Heartbeat %s", "ok" if ok else "failed (will retry)")
-                last_heartbeat = now
-            if now - last_flush >= cfg.usage_flush_interval_seconds:
-                flush_usage()
-                last_flush = now
+            try:
+                tracker.sample(interval, foreground_process_name(), idle_seconds())
+                now = time.monotonic()
+                if now - last_heartbeat >= cfg.heartbeat_interval_seconds:
+                    if not do_heartbeat():
+                        return 2
+                    last_heartbeat = now
+                if now - last_flush >= cfg.usage_flush_interval_seconds:
+                    flush_usage()
+                    last_flush = now
+            except Exception:  # noqa: BLE001 - keep running through transient errors
+                log.exception("Error during agent cycle; continuing.")
     except KeyboardInterrupt:
         log.info("Stopping; flushing remaining usage...")
         flush_usage()

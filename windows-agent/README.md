@@ -60,6 +60,40 @@ flushes any pending usage before exiting.
 - Heartbeats are best-effort and retried on the next interval.
 - All network errors are caught; the agent keeps running through outages.
 
+## Managed startup (auto-start at logon)
+
+To have the agent start automatically after sign-in/reboot, install it as a
+per-user scheduled task (no administrator rights required):
+
+```bash
+.\install.ps1
+```
+
+This registers a task that launches the agent in **supervise** mode at logon. The
+task is **visible** in Task Scheduler and in Task Manager > Startup - the agent is
+not hidden and uses no covert persistence. Remove it with:
+
+```bash
+.\uninstall.ps1          # removes the task
+.\uninstall.ps1 -Purge   # also deletes the stored device token
+```
+
+## Crash recovery
+
+Supervise mode (`run_agent.py --supervise`, used by the installed task) restarts
+the agent with exponential backoff if it exits unexpectedly, and the installed
+task also carries Windows' own restart-on-failure setting. It does **not** restart
+after a clean stop or when the device has been **revoked** (a revoked device's
+check-in is rejected and the agent stops itself).
+
+## Updates
+
+On each check-in the backend reports the latest published agent version. If this
+agent is behind, it logs a notice and the dashboard shows an "Update available"
+badge on the device. Applying an update is currently a manual/admin step (replace
+the files and restart the task). Automatic, signature-verified self-update is a
+deliberate future step, not yet implemented.
+
 ## Configuration
 
 | Key                         | Meaning                                  | Default |
@@ -74,7 +108,8 @@ flushes any pending usage before exiting.
 ## Status and limitations
 
 This is a **prototype**, suitable for development and a supervised test laptop.
-Managed startup as a Windows service, signed installers, and secure auto-update
-are **Milestone 6**. Until then the agent runs in a console you start manually.
-Foreground detection and battery status require a real Windows desktop session;
-they return nothing on a server or headless environment.
+Managed startup, crash recovery, version reporting, and admin-controlled uninstall
+are implemented (Milestone 6). Still future: a signed installer package and
+automatic, signature-verified self-update. Foreground detection and battery status
+require a real Windows desktop session; they return nothing on a server or
+headless environment.

@@ -68,6 +68,15 @@ def create_app() -> FastAPI:
     async def health() -> dict[str, str]:
         return {"status": "ok", "version": __version__}
 
+    @app.get("/meta", tags=["meta"])
+    async def meta() -> dict[str, str]:
+        # Version info only; not sensitive. Used by the dashboard to flag
+        # devices whose agent is behind the latest published version.
+        return {
+            "server_version": __version__,
+            "latest_agent_version": settings.agent_latest_version,
+        }
+
     @app.get("/", tags=["meta"])
     async def root() -> dict[str, str]:
         return {"name": settings.app_name, "docs": "/docs", "health": "/health"}

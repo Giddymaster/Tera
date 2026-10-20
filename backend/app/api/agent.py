@@ -118,10 +118,14 @@ async def heartbeat(
         device.power_plugged = payload.power_plugged
     await session.commit()
 
+    reported = payload.agent_version or device.agent_version
+    latest = settings.agent_latest_version
     return HeartbeatResponse(
         enrollment_status=device.enrollment_status.value,
         last_seen_at=now,
         server_time=now,
+        latest_agent_version=latest,
+        update_available=reported is not None and reported != latest,
     )
 
 

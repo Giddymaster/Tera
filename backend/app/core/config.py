@@ -50,6 +50,9 @@ class Settings(BaseSettings):
     # Long-lived token issued to a device agent at enrollment. Revocation is by
     # setting the device's enrollment status to "revoked".
     device_token_days: int = Field(default=365, ge=1)
+    # The latest published agent version. Agents compare their own version to
+    # this on check-in so admins can see which devices need an update.
+    agent_latest_version: str = "0.6.0"
     # A device is considered online only if its last heartbeat is this recent.
     online_threshold_seconds: int = Field(default=300, ge=30)
 

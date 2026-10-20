@@ -6,12 +6,14 @@ iPhones. It provides a central admin dashboard, device enrollment, health and
 activity reporting, policy-controlled screenshots, and authorized remote support.
 
 This project is built incrementally in milestones. **It is currently at
-Milestone 5: Windows agent.** The backend, a React dashboard, and a real Windows
-agent exist and are tested on Windows 11. The agent reports device health (OS,
-disk, battery) and foreground application usage (app names and durations only).
-No screenshots or location data is collected, and there is no keylogging,
-clipboard, or window-title capture. See
-[docs/data-collection.md](docs/data-collection.md) for exactly what is stored.
+Milestone 6: managed startup, recovery, and updates.** The backend, a React
+dashboard, and a real Windows agent exist and are tested on Windows 11. The agent
+reports device health and foreground application usage (app names and durations
+only), auto-starts at logon via a visible scheduled task, recovers from crashes,
+and reports its version so admins see which devices need updating. No screenshots
+or location data is collected, and there is no keylogging, clipboard, or
+window-title capture. See [docs/data-collection.md](docs/data-collection.md) for
+exactly what is stored.
 
 ---
 
@@ -120,8 +122,8 @@ You should see the folders listed under *Project structure* above.
 2. ✅ Backend, database, admin authentication, device APIs
 3. ✅ React dashboard with simulated devices
 4. ✅ Device registration, heartbeat, status, audit logs
-5. **Windows agent: device health + foreground app usage** ← you are here
-6. Managed startup, secure updates, agent recovery
+5. ✅ Windows agent: device health + foreground app usage
+6. **Managed startup, secure updates, agent recovery** ← you are here
 7. Policy-controlled screenshots + authorized live remote support
 8. Android management feasibility + implementation
 9. Apple MDM feasibility + implementation

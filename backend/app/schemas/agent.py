@@ -40,3 +40,5 @@ class HeartbeatResponse(BaseModel):
     enrollment_status: str
     last_seen_at: datetime
     server_time: datetime
+    latest_agent_version: str
+    update_available: bool = False

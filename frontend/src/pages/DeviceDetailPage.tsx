@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ApiError } from "../api/client";
-import { getDevice, getDeviceUsage } from "../api/endpoints";
-import type { DeviceOut, DeviceUsageOut } from "../api/types";
+import { getDevice, getDeviceUsage, getMeta } from "../api/endpoints";
+import type { DeviceOut, DeviceUsageOut, MetaInfo } from "../api/types";
 import { StatusBadge } from "../components/StatusBadge";
 import { computeStatus } from "../lib/deviceStatus";
 import { formatDateTime, formatDuration, relativeTime } from "../lib/format";
@@ -28,6 +28,7 @@ export function DeviceDetailPage() {
   const { deviceUid = "" } = useParams();
   const [device, setDevice] = useState<DeviceOut | null>(null);
   const [usage, setUsage] = useState<DeviceUsageOut | null>(null);
+  const [meta, setMeta] = useState<MetaInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,13 +36,15 @@ export function DeviceDetailPage() {
     let active = true;
     async function load() {
       try {
-        const [d, u] = await Promise.all([
+        const [d, u, m] = await Promise.all([
           getDevice(deviceUid),
           getDeviceUsage(deviceUid, 7).catch(() => null),
+          getMeta().catch(() => null),
         ]);
         if (active) {
           setDevice(d);
           setUsage(u);
+          setMeta(m);
         }
       } catch (err) {
         if (active) {
@@ -117,7 +120,16 @@ export function DeviceDetailPage() {
           </div>
           <div>
             <dt>Agent version</dt>
-            <dd>{device.agent_version ?? "—"}</dd>
+            <dd>
+              {device.agent_version ?? "—"}
+              {device.agent_version &&
+                meta &&
+                device.agent_version !== meta.latest_agent_version && (
+                  <span className="update-badge" title={`Latest: ${meta.latest_agent_version}`}>
+                    Update available
+                  </span>
+                )}
+            </dd>
           </div>
           <div>
             <dt>OS version</dt>

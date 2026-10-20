@@ -542,6 +542,18 @@ h2 {
 .usage-app {
   font-weight: 500;
 }
+.update-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--pending) 18%, transparent);
+  color: var(--pending);
+  border: 1px solid color-mix(in srgb, var(--pending) 40%, transparent);
+  vertical-align: middle;
+}
 
 /* ============================================================
    Responsive
