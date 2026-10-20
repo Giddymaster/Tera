@@ -2,11 +2,19 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 from app.models.enums import Role
+
+
+def _iso_utc(value: datetime | None) -> str | None:
+    if value is None:
+        return None
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc).isoformat()
 
 
 class LoginRequest(BaseModel):
@@ -37,3 +45,7 @@ class AdminOut(BaseModel):
     created_at: datetime
     last_login_at: datetime | None = None
     permissions: list[str] = Field(default_factory=list)
+
+    @field_serializer("created_at", "last_login_at")
+    def _ser_dt(self, value: datetime | None) -> str | None:
+        return _iso_utc(value)
