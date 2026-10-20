@@ -1,0 +1,14 @@
+[project]
+name = "employee-device-manager-backend"
+version = "0.2.0"
+description = "Backend API for the Employee Device Manager"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["../tests/backend"]
+addopts = "-q"
+filterwarnings = [
+    # The dev-only ephemeral JWT secret warning is expected during tests.
+    "ignore::UserWarning",
+]

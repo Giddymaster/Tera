@@ -6,8 +6,10 @@ iPhones. It provides a central admin dashboard, device enrollment, health and
 activity reporting, policy-controlled screenshots, and authorized remote support.
 
 This project is built incrementally in milestones. **It is currently at
-Milestone 1: project scaffolding only.** No monitoring agents exist yet and no
-device data is collected.
+Milestone 2: backend foundation.** The backend (API, database, admin login,
+device management) exists and is tested. No monitoring agents exist yet and no
+employee activity, screenshots, or location data is collected. See
+[docs/data-collection.md](docs/data-collection.md) for exactly what is stored.
 
 ---
 
@@ -112,8 +114,8 @@ You should see the folders listed under *Project structure* above.
 
 ## Roadmap (milestones)
 
-1. **Project structure and scaffolding** ← you are here
-2. Backend, database, admin authentication, device APIs
+1. ✅ Project structure and scaffolding
+2. **Backend, database, admin authentication, device APIs** ← you are here
 3. React dashboard with simulated devices
 4. Device registration, heartbeat, status, audit logs
 5. Windows agent: device health + foreground app usage
