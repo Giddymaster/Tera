@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { ApiError } from "../api/client";
-import { getDevice, getDeviceUsage, getMeta } from "../api/endpoints";
+import {
+  deleteDevice,
+  getDevice,
+  getDeviceUsage,
+  getMeta,
+  revokeDevice,
+} from "../api/endpoints";
 import type { DeviceOut, DeviceUsageOut, MetaInfo } from "../api/types";
+import { useAuth } from "../auth/AuthContext";
 import { LocationCard } from "../components/LocationCard";
 import { RemoteSupportPanel } from "../components/RemoteSupportPanel";
 import { ScreenshotsPanel } from "../components/ScreenshotsPanel";
@@ -23,6 +30,9 @@ function diskLabel(device: DeviceOut): string | null {
 
 export function DeviceDetailPage() {
   const { deviceUid = "" } = useParams();
+  const navigate = useNavigate();
+  const { hasPermission } = useAuth();
+  const canManage = hasPermission("manage_devices");
   const [device, setDevice] = useState<DeviceOut | null>(null);
   const [usage, setUsage] = useState<DeviceUsageOut | null>(null);
   const [meta, setMeta] = useState<MetaInfo | null>(null);
@@ -82,6 +92,33 @@ export function DeviceDetailPage() {
       : null;
   const maxUsage = usage?.apps.length ? usage.apps[0].seconds : 0;
 
+  async function handleRevoke() {
+    if (!window.confirm(`Revoke "${device!.name}"? Its agent will stop reporting.`)) {
+      return;
+    }
+    try {
+      setDevice(await revokeDevice(device!.device_uid));
+    } catch {
+      window.alert("Could not revoke the device.");
+    }
+  }
+
+  async function handleDelete() {
+    if (
+      !window.confirm(
+        `Delete "${device!.name}" and all its data (screenshots, usage, location)? This cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+    try {
+      await deleteDevice(device!.device_uid);
+      navigate("/");
+    } catch {
+      window.alert("Could not delete the device.");
+    }
+  }
+
   return (
     <div className="page">
       <Link to="/" className="link-back">
@@ -93,7 +130,19 @@ export function DeviceDetailPage() {
           <h1>{device.name}</h1>
           <p className="muted small mono">{device.device_uid}</p>
         </div>
-        <StatusBadge status={computeStatus(device)} />
+        <div className="card-actions">
+          <StatusBadge status={computeStatus(device)} />
+          {canManage && device.enrollment_status !== "revoked" && (
+            <button className="btn btn-sm" onClick={() => void handleRevoke()}>
+              Revoke
+            </button>
+          )}
+          {canManage && (
+            <button className="btn btn-sm btn-danger" onClick={() => void handleDelete()}>
+              Delete
+            </button>
+          )}
+        </div>
       </div>
 
       <section className="card">

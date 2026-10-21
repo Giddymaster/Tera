@@ -24,7 +24,7 @@ export function AddDeviceModal({
 
   const apiBase = `${window.location.origin}/api`;
   const installCmd = result
-    ? `$env:TERA_UID="${result.device.device_uid}"; $env:TERA_SECRET="${result.enrollment_secret}"; $env:TERA_URL="${apiBase}"; irm https://raw.githubusercontent.com/Giddymaster/Tera/main/windows-agent/bootstrap.ps1 | iex`
+    ? `irm https://raw.githubusercontent.com/Giddymaster/Tera/main/windows-agent/bootstrap.ps1 -OutFile "$env:TEMP\\tera.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\\tera.ps1" -DeviceUid "${result.device.device_uid}" -Secret "${result.enrollment_secret}" -ServerUrl "${apiBase}"`
     : "";
 
   async function submit(e: FormEvent) {
@@ -141,9 +141,10 @@ export function AddDeviceModal({
               </button>
             </div>
             <p className="muted small">
-              <strong>One-command install (Windows):</strong> run this in PowerShell
-              on the laptop. It installs and auto-starts the agent. (Python required:
-              <span className="mono"> winget install -e --id Python.Python.3.12</span>)
+              <strong>One-command install (Windows):</strong> open <strong>PowerShell</strong>
+              {" "}on the laptop (not Command Prompt) and paste this. It installs and
+              auto-starts the agent. Python required first:
+              <span className="mono"> winget install -e --id Python.Python.3.12</span>
             </p>
             <pre className="config-snippet">{installCmd}</pre>
             <button className="btn btn-sm" onClick={() => copy("cmd", installCmd)}>

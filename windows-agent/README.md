@@ -49,10 +49,11 @@ Prerequisite: Python 3.11+ on the laptop. If it's missing:
 winget install -e --id Python.Python.3.12
 ```
 
-The command from the dashboard looks like this (values filled in for you):
+Run it in **PowerShell** (not Command Prompt). The command from the dashboard
+looks like this (values filled in for you):
 
 ```bash
-$env:TERA_UID="dev_..."; $env:TERA_SECRET="..."; $env:TERA_URL="https://your-domain/api"; irm https://raw.githubusercontent.com/Giddymaster/Tera/main/windows-agent/bootstrap.ps1 | iex
+irm https://raw.githubusercontent.com/Giddymaster/Tera/main/windows-agent/bootstrap.ps1 -OutFile "$env:TEMP\tera.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\tera.ps1" -DeviceUid "dev_..." -Secret "..." -ServerUrl "https://your-domain/api"
 ```
 
 The device appears **Online** in the dashboard within a minute. Remove it later with
