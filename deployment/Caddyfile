@@ -1,0 +1,26 @@
+# Serves the SPA and reverse-proxies the API. Caddy obtains TLS automatically
+# (Let's Encrypt) when DOMAIN is a real, publicly-resolvable domain; for
+# "localhost" it uses an internal self-signed certificate.
+{$DOMAIN:localhost} {
+	encode gzip
+
+	# API: strip the /api prefix and forward to the backend container.
+	handle_path /api/* {
+		reverse_proxy backend:8000
+	}
+
+	# Everything else: serve the single-page app with history fallback.
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+
+	header {
+		# Defense-in-depth headers for the static app (the API sets its own).
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy no-referrer
+		-Server
+	}
+}

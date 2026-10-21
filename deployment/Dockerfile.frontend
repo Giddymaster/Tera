@@ -1,0 +1,16 @@
+# Frontend build + Caddy (static files, reverse proxy, automatic HTTPS).
+# Build context is the repository root.
+FROM node:20-slim AS build
+WORKDIR /app
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend/ ./
+# The app calls the API at this base URL. In production it is same-origin "/api",
+# which Caddy proxies to the backend.
+ARG VITE_API_BASE_URL=/api
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+RUN npm run build
+
+FROM caddy:2-alpine
+COPY deployment/Caddyfile /etc/caddy/Caddyfile
+COPY --from=build /app/dist /srv

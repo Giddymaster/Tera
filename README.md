@@ -5,16 +5,17 @@ its **own company-owned devices** (1–10): Windows laptops, Android phones, and
 iPhones. It provides a central admin dashboard, device enrollment, health and
 activity reporting, policy-controlled screenshots, and authorized remote support.
 
-This project is built incrementally in milestones. **It is currently at
-Milestone 11: security, backups, and retention.** The backend, a React dashboard,
-and a real Windows agent are tested on Windows 11 (device health, foreground app
-usage, policy-controlled encrypted screenshots, authorized live support, opt-in
-location with honest source/freshness indicators, alerts, and reporting).
-Milestone 11 adds a security review, security headers, encrypted database backups
-with a restore procedure, full data-retention cleanup, and full-device-data
-deletion. Milestones 8–9 add assessed, scaffolded (not live-tested) Android/Apple
-integrations. See [docs/security-review.md](docs/security-review.md),
-[docs/backups.md](docs/backups.md), and
+This project is built incrementally in milestones, and **all twelve are now
+complete.** The backend, a React dashboard, and a real Windows agent are tested on
+Windows 11 (device health, foreground app usage, policy-controlled encrypted
+screenshots, authorized live support, opt-in location with honest source/freshness
+indicators, alerts, and reporting), with a security review, encrypted backups, and
+full retention/deletion. Android and Apple management are assessed and scaffolded
+(not live-tested; need vendor accounts and devices). Milestone 12 adds the
+self-hosted production stack (Docker Compose: private PostgreSQL, FastAPI, and
+Caddy with automatic HTTPS) and a staged rollout plan; a live deploy needs a host
+and domain. See [docs/deployment.md](docs/deployment.md),
+[docs/security-review.md](docs/security-review.md), and
 [docs/data-collection.md](docs/data-collection.md).
 
 ---
@@ -130,8 +131,8 @@ You should see the folders listed under *Project structure* above.
 8. ✅ Android management feasibility + implementation
 9. ✅ Apple MDM feasibility + implementation
 10. ✅ Location features, alerts, reporting
-11. **Security review, backups, retention, automated tests** ← you are here
-12. Cloud deployment and gradual rollout
+11. ✅ Security review, backups, retention, automated tests
+12. **Cloud deployment and gradual rollout** ← you are here
 
 See [docs/compatibility.md](docs/compatibility.md) for the per-platform feature
 status table. A feature is only marked supported after it is implemented and

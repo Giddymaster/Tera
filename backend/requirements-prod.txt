@@ -1,0 +1,7 @@
+# Production-only dependencies, layered on top of requirements.txt.
+# Installed in the Docker image (Python 3.12), where these have wheels.
+-r requirements.txt
+
+# PostgreSQL drivers: asyncpg for the app (async), psycopg for Alembic (sync).
+asyncpg>=0.30,<1.0
+psycopg[binary]>=3.2,<4.0

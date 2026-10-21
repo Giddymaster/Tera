@@ -1,0 +1,12 @@
+# Normalize line endings. Keep shell scripts and container config LF so they run
+# correctly inside Linux Docker images even when cloned on Windows.
+* text=auto
+
+*.sh text eol=lf
+Dockerfile.* text eol=lf
+Caddyfile text eol=lf
+entrypoint.sh text eol=lf
+
+# Windows-specific scripts stay CRLF.
+*.ps1 text eol=crlf
+*.bat text eol=crlf
