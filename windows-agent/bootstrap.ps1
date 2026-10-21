@@ -50,10 +50,11 @@ Copy-Item -Recurse -Force (Join-Path $extract "Tera-$Branch\windows-agent\*") $I
 
 Set-Location $InstallDir
 
-Write-Host "Setting up the Python environment (first run takes a minute)..."
+Write-Host "Setting up the Python environment..."
 python -m venv .venv
-& "$InstallDir\.venv\Scripts\python.exe" -m pip install --quiet --upgrade pip
-& "$InstallDir\.venv\Scripts\python.exe" -m pip install --quiet -r requirements.txt
+& "$InstallDir\.venv\Scripts\python.exe" -m pip install --upgrade pip
+Write-Host "Installing dependencies (a few minutes on a slow connection; progress below)..."
+& "$InstallDir\.venv\Scripts\python.exe" -m pip install -r requirements.txt
 
 Write-Host "Writing configuration..."
 $config = [ordered]@{
