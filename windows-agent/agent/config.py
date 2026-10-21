@@ -29,7 +29,9 @@ class Config:
 
 def load_config(path: str | Path) -> Config:
     path = Path(path)
-    with path.open(encoding="utf-8") as f:
+    # utf-8-sig tolerates a UTF-8 BOM (which Windows PowerShell / Notepad may add)
+    # and reads plain UTF-8 fine.
+    with path.open(encoding="utf-8-sig") as f:
         data = json.load(f)
 
     required = ("server_url", "device_uid", "enrollment_secret")

@@ -65,7 +65,14 @@ $config = [ordered]@{
     usage_flush_interval_seconds  = 120
     sample_interval_seconds       = 5
 }
-$config | ConvertTo-Json | Set-Content -Path (Join-Path $InstallDir "config.json") -Encoding utf8
+# Write without a BOM (Set-Content -Encoding utf8 adds one on Windows PowerShell,
+# which breaks JSON parsing).
+$json = $config | ConvertTo-Json
+[System.IO.File]::WriteAllText(
+    (Join-Path $InstallDir "config.json"),
+    $json,
+    (New-Object System.Text.UTF8Encoding($false))
+)
 # Clear any previous enrollment so it enrolls fresh against this server.
 Remove-Item -ErrorAction SilentlyContinue (Join-Path $InstallDir ".agent_state.json")
 
