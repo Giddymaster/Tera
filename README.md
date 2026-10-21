@@ -6,15 +6,15 @@ iPhones. It provides a central admin dashboard, device enrollment, health and
 activity reporting, policy-controlled screenshots, and authorized remote support.
 
 This project is built incrementally in milestones. **It is currently at
-Milestone 10: location, alerts, and reporting.** The backend, a React dashboard,
+Milestone 11: security, backups, and retention.** The backend, a React dashboard,
 and a real Windows agent are tested on Windows 11 (device health, foreground app
-usage, policy-controlled encrypted screenshots, authorized live support, and now
-opt-in location with honest source/freshness indicators, derived fleet alerts, and
-a summary report). Milestones 8–9 add researched feasibility assessments and
-integration scaffolds for Android and Apple; those live mobile paths need vendor
-accounts and devices and are documented, not yet tested. No keylogging, clipboard,
-window-title, screenshot, or app-usage capture exists on Android or iOS. See the
-feasibility docs under [docs/](docs/apple-mdm-feasibility.md) and
+usage, policy-controlled encrypted screenshots, authorized live support, opt-in
+location with honest source/freshness indicators, alerts, and reporting).
+Milestone 11 adds a security review, security headers, encrypted database backups
+with a restore procedure, full data-retention cleanup, and full-device-data
+deletion. Milestones 8–9 add assessed, scaffolded (not live-tested) Android/Apple
+integrations. See [docs/security-review.md](docs/security-review.md),
+[docs/backups.md](docs/backups.md), and
 [docs/data-collection.md](docs/data-collection.md).
 
 ---
@@ -129,8 +129,8 @@ You should see the folders listed under *Project structure* above.
 7. ✅ Policy-controlled screenshots + authorized live remote support
 8. ✅ Android management feasibility + implementation
 9. ✅ Apple MDM feasibility + implementation
-10. **Location features, alerts, reporting** ← you are here
-11. Security review, backups, retention, automated tests
+10. ✅ Location features, alerts, reporting
+11. **Security review, backups, retention, automated tests** ← you are here
 12. Cloud deployment and gradual rollout
 
 See [docs/compatibility.md](docs/compatibility.md) for the per-platform feature

@@ -133,6 +133,20 @@ is available only via Lost Mode.
 disk, low battery, update available, awaiting enrollment) and aggregate counts;
 they add no new stored personal data.
 
+## Retention and deletion (Milestone 11)
+
+Every data type has a retention path, run by one scheduled cleanup
+(`backend/scripts/retention_cleanup.py`):
+
+- **Screenshots** and **location fixes** expire per the per-device policy.
+- **App usage** and **audit logs** expire per `USAGE_RETENTION_DAYS` and
+  `AUDIT_RETENTION_DAYS` (defaults 365).
+
+**Deleting a device** removes the device record and **all** associated data:
+screenshots (rows and the encrypted files on disk), usage, location, sessions,
+and policies (via database cascade). Backups are encrypted at rest; see
+[backups.md](backups.md).
+
 ## Future milestones
 
 When agents are added, this table will be extended with: foreground application

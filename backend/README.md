@@ -51,11 +51,16 @@ PostgreSQL for production).
   `view_reports`, newest first, paginated.
 - **Migrations** (`migrations/`) — Alembic; initial schema plus a device-health
   column migration.
-- **Tests** (`../tests/backend/`) — 83 tests covering auth, authorization,
+- **Tests** (`../tests/backend/`) — 87 tests covering auth, authorization,
   device enrollment/heartbeat, token separation, revocation, device health,
-  app-usage, screenshots, remote sessions, retention, location policy/report/
-  freshness, derived alerts, fleet summary, Android and Apple status paths,
-  validation, rate limiting, and audit logging.
+  app-usage, screenshots, remote sessions, retention, location, derived alerts,
+  fleet summary, Android/Apple status, security headers, full-device-data
+  deletion (cascade + blobs), backup/restore, validation, rate limiting, and
+  audit logging.
+- **Ops scripts** (`scripts/`) — `backup.py` / `restore.py` (encrypted DB
+  backups), `retention_cleanup.py` (all data-retention cleanups), plus
+  `create_admin.py`, `seed_demo.py`, `simulate_agent.py`,
+  `cleanup_screenshots.py`. See docs/backups.md.
 
 ## Try the full agent flow
 

@@ -78,6 +78,28 @@ def create_app() -> FastAPI:
             )
         return await call_next(request)
 
+    # Interactive docs serve HTML/JS from a CDN, so skip the strict CSP there.
+    _DOCS_PATHS = ("/docs", "/redoc", "/openapi.json")
+
+    @app.middleware("http")
+    async def security_headers(request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "no-referrer"
+        response.headers["X-XSS-Protection"] = "0"
+        response.headers["Cross-Origin-Resource-Policy"] = "same-site"
+        if not request.url.path.startswith(_DOCS_PATHS):
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'none'; frame-ancestors 'none'"
+            )
+        # Only assert HSTS in production (served over HTTPS).
+        if settings.is_production:
+            response.headers["Strict-Transport-Security"] = (
+                "max-age=63072000; includeSubDomains"
+            )
+        return response
+
     app.include_router(auth.router)
     app.include_router(devices.router)
     app.include_router(agent.router)

@@ -20,9 +20,11 @@ from app.core.security import (
     generate_enrollment_secret,
     hash_secret,
 )
+from app.core.screenshots import delete_blob
 from app.models.admin import Admin
 from app.models.device import Device
 from app.models.enums import EnrollmentStatus, Permission
+from app.models.monitoring import Screenshot
 from app.models.usage import AppUsage
 from app.schemas.device import DeviceCreate, DeviceCreateResponse, DeviceOut
 from app.schemas.usage import AppUsageOut, DeviceUsageOut
@@ -142,6 +144,18 @@ async def delete_device(
 ):
     device = await _get_or_404(session, device_uid)
     uid = device.device_uid
+
+    # Delete the device's encrypted screenshot files from disk first; the DB rows
+    # (screenshots, usage, location, sessions, policies) are removed by ON DELETE
+    # CASCADE when the device row is deleted.
+    paths = (
+        await session.execute(
+            select(Screenshot.storage_path).where(Screenshot.device_id == device.id)
+        )
+    ).scalars().all()
+    for path in paths:
+        delete_blob(path)
+
     await session.delete(device)
     await record_action(
         session,

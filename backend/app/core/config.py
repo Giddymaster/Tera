@@ -80,6 +80,15 @@ class Settings(BaseSettings):
     # A device is considered online only if its last heartbeat is this recent.
     online_threshold_seconds: int = Field(default=300, ge=30)
 
+    # Data retention (days) for the consolidated cleanup. Screenshots and location
+    # also have per-device retention; these cover the aggregate stores.
+    usage_retention_days: int = Field(default=365, ge=1)
+    audit_retention_days: int = Field(default=365, ge=30)
+
+    # Encrypted database backups (see docs/backups.md).
+    backup_dir: str = "./backups"
+    backup_keep: int = Field(default=14, ge=1)
+
     # Login rate limiting (per client IP).
     login_max_attempts: int = Field(default=5, ge=1)
     login_window_seconds: int = Field(default=300, ge=1)
