@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { listDevices } from "../api/endpoints";
 import type { DeviceOut } from "../api/types";
+import { useAuth } from "../auth/AuthContext";
+import { AddDeviceModal } from "../components/AddDeviceModal";
 import { StatCard } from "../components/StatCard";
 import { StatusBadge } from "../components/StatusBadge";
 import { computeStatus, type LiveStatus } from "../lib/deviceStatus";
@@ -19,6 +21,8 @@ export function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [refreshedAt, setRefreshedAt] = useState<Date | null>(null);
   const [query, setQuery] = useState("");
+  const [showAdd, setShowAdd] = useState(false);
+  const { hasPermission } = useAuth();
 
   const load = useCallback(async () => {
     setError(null);
@@ -68,10 +72,24 @@ export function DashboardPage() {
               : "Loading…"}
           </p>
         </div>
-        <button className="btn btn-ghost" onClick={() => void load()}>
-          Refresh
-        </button>
+        <div className="card-actions">
+          <button className="btn btn-ghost" onClick={() => void load()}>
+            Refresh
+          </button>
+          {hasPermission("manage_devices") && (
+            <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
+              Add device
+            </button>
+          )}
+        </div>
       </div>
+
+      {showAdd && (
+        <AddDeviceModal
+          onClose={() => setShowAdd(false)}
+          onCreated={() => void load()}
+        />
+      )}
 
       <div className="stat-grid">
         <StatCard label="Total devices" value={counts.total} />

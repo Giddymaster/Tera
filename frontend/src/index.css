@@ -279,6 +279,7 @@ h2 {
   font-weight: 500;
 }
 .field input,
+.field select,
 .search {
   font: inherit;
   padding: 0.55rem 0.7rem;
@@ -288,9 +289,82 @@ h2 {
   color: var(--text);
 }
 .field input:focus,
+.field select:focus,
 .search:focus {
   outline: 2px solid var(--primary);
   outline-offset: 1px;
+}
+
+/* ---- Modal (Add device) ---- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  z-index: 50;
+}
+.modal {
+  width: 100%;
+  max-width: 460px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  max-height: 90vh;
+  overflow: auto;
+}
+.modal-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.alert-warn {
+  padding: 0.65rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  background: color-mix(in srgb, var(--pending) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--pending) 35%, transparent);
+  color: var(--pending);
+}
+.copy-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.copy-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  min-width: 120px;
+}
+.copy-row code {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+}
+.config-snippet {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0;
 }
 
 .alert {
