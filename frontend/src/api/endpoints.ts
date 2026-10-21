@@ -3,15 +3,18 @@
 import { apiBlob, apiRequest, tokenStore } from "./client";
 import type {
   AdminOut,
+  Alert,
   AndroidStatus,
   AppleStatus,
   AuditLogOut,
   DeviceCreate,
   DeviceCreateResponse,
+  DeviceLocation,
   DeviceOut,
   DeviceUsageOut,
   MetaInfo,
   RemoteSession,
+  ReportSummary,
   ScreenshotMeta,
   ScreenshotPolicy,
   TokenResponse,
@@ -124,4 +127,29 @@ export function getAndroidDevices(): Promise<Record<string, unknown>[]> {
 // ---- Apple MDM ----
 export function getAppleStatus(): Promise<AppleStatus> {
   return apiRequest<AppleStatus>("/apple/status");
+}
+
+// ---- Location ----
+export function getDeviceLocation(uid: string): Promise<DeviceLocation> {
+  return apiRequest<DeviceLocation>(`/devices/${uid}/location`);
+}
+
+export function updateLocationPolicy(
+  uid: string,
+  body: { enabled: boolean; retention_days: number },
+): Promise<{ enabled: boolean; retention_days: number }> {
+  return apiRequest(`/devices/${uid}/location-policy`, { method: "PUT", body });
+}
+
+export function requestLocation(uid: string): Promise<{ status: string }> {
+  return apiRequest(`/devices/${uid}/location/request`, { method: "POST" });
+}
+
+// ---- Alerts & reports ----
+export function getAlerts(): Promise<Alert[]> {
+  return apiRequest<Alert[]>("/alerts");
+}
+
+export function getReportSummary(): Promise<ReportSummary> {
+  return apiRequest<ReportSummary>("/reports/summary");
 }

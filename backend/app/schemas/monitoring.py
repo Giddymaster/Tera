@@ -96,3 +96,48 @@ class DirectivesOut(BaseModel):
     session_active: bool
     session_id: int | None
     session_capture_interval_seconds: int
+    location_enabled: bool = False
+    location_requested: bool = False
+
+
+# --------------------------------------------------------------------------- #
+#  Location
+# --------------------------------------------------------------------------- #
+class LocationPolicyIn(BaseModel):
+    enabled: bool = False
+    retention_days: int = Field(default=30, ge=1, le=365)
+
+
+class LocationPolicyOut(LocationPolicyIn):
+    model_config = ConfigDict(from_attributes=True)
+
+
+class LocationReportIn(BaseModel):
+    # The agent reports a status; coordinates are present only when status == "ok".
+    status: Literal["ok", "unavailable", "permission_restricted"]
+    latitude: float | None = Field(default=None, ge=-90, le=90)
+    longitude: float | None = Field(default=None, ge=-180, le=180)
+    accuracy_m: float | None = Field(default=None, ge=0)
+    source: str = Field(default="windows_agent", max_length=32)
+
+
+class LocationPointOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    captured_at: datetime
+    latitude: float
+    longitude: float
+    accuracy_m: float | None
+    source: str
+
+    @field_serializer("captured_at")
+    def _ser_dt(self, value: datetime) -> str | None:
+        return _iso_utc(value)
+
+
+class LocationOut(BaseModel):
+    enabled: bool
+    # "current" (recent fix), "stale" (old fix), or "none" (no stored fix)
+    freshness: str
+    latest: LocationPointOut | None
+    history: list[LocationPointOut]

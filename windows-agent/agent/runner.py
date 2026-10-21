@@ -20,8 +20,13 @@ from .client import ApiClient, EnrollError
 from .config import load_config
 from .foreground import foreground_process_name, idle_seconds
 from .health import collect_health
+from .location import collect_location
 from .state import StateStore
 from .tracker import UsageTracker, merge_entries
+
+# Location is reported on request, or at most this often when enabled (not
+# continuous).
+LOCATION_INTERVAL_SECONDS = 15 * 60
 
 log = logging.getLogger("agent")
 
@@ -87,6 +92,7 @@ def run(config_path: str = "config.json") -> int:
     last_directives_poll = 0.0
     last_scheduled_capture = 0.0
     last_session_capture = 0.0
+    last_location_report = 0.0
 
     def do_capture(trigger: str, session_id: int | None = None) -> None:
         shot = capture_jpeg()
@@ -194,6 +200,18 @@ def run(config_path: str = "config.json") -> int:
                         if not fg_excluded:
                             do_capture("session", sid)
                         last_session_capture = now
+
+                # Location: on admin request, or at a slow interval when enabled.
+                if directives.get("location_requested"):
+                    client.report_location(token, collect_location())
+                    directives["location_requested"] = False
+                    last_directives_poll = now - 12
+                    last_location_report = now
+                elif directives.get("location_enabled") and (
+                    now - last_location_report >= LOCATION_INTERVAL_SECONDS
+                ):
+                    client.report_location(token, collect_location())
+                    last_location_report = now
             except Exception:  # noqa: BLE001 - keep running through transient errors
                 log.exception("Error during agent cycle; continuing.")
     except KeyboardInterrupt:

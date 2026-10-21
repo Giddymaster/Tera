@@ -4,6 +4,7 @@ import { Layout } from "./components/Layout";
 import { ActivityPage } from "./pages/ActivityPage";
 import { AndroidPage } from "./pages/AndroidPage";
 import { ApplePage } from "./pages/ApplePage";
+import { ReportsPage } from "./pages/ReportsPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { DeviceDetailPage } from "./pages/DeviceDetailPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -17,6 +18,7 @@ export default function App() {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/devices/:deviceUid" element={<DeviceDetailPage />} />
           <Route path="/activity" element={<ActivityPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
           <Route path="/android" element={<AndroidPage />} />
           <Route path="/apple" element={<ApplePage />} />
         </Route>

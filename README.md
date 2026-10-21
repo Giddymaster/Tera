@@ -6,15 +6,15 @@ iPhones. It provides a central admin dashboard, device enrollment, health and
 activity reporting, policy-controlled screenshots, and authorized remote support.
 
 This project is built incrementally in milestones. **It is currently at
-Milestone 9: Apple MDM.** The backend, a React dashboard, and a real Windows agent
-are tested on Windows 11 (device health, foreground app usage, policy-controlled
-encrypted screenshots, authorized live support). Milestones 8 and 9 add researched
-feasibility assessments and integration scaffolds for Android (Android Management
-API) and Apple (MDM), each with an honest capability matrix; the live mobile paths
-need vendor accounts and physical devices and are documented, not yet tested. No
-keylogging, clipboard, window-title, screenshot, or app-usage capture exists on
-Android or iOS. See the feasibility docs under
-[docs/](docs/apple-mdm-feasibility.md) and
+Milestone 10: location, alerts, and reporting.** The backend, a React dashboard,
+and a real Windows agent are tested on Windows 11 (device health, foreground app
+usage, policy-controlled encrypted screenshots, authorized live support, and now
+opt-in location with honest source/freshness indicators, derived fleet alerts, and
+a summary report). Milestones 8–9 add researched feasibility assessments and
+integration scaffolds for Android and Apple; those live mobile paths need vendor
+accounts and devices and are documented, not yet tested. No keylogging, clipboard,
+window-title, screenshot, or app-usage capture exists on Android or iOS. See the
+feasibility docs under [docs/](docs/apple-mdm-feasibility.md) and
 [docs/data-collection.md](docs/data-collection.md).
 
 ---
@@ -128,8 +128,8 @@ You should see the folders listed under *Project structure* above.
 6. ✅ Managed startup, secure updates, agent recovery
 7. ✅ Policy-controlled screenshots + authorized live remote support
 8. ✅ Android management feasibility + implementation
-9. **Apple MDM feasibility + implementation** ← you are here
-10. Location features, alerts, reporting
+9. ✅ Apple MDM feasibility + implementation
+10. **Location features, alerts, reporting** ← you are here
 11. Security review, backups, retention, automated tests
 12. Cloud deployment and gradual rollout
 

@@ -115,6 +115,24 @@ or keystrokes — Apple MDM does not permit these. Location on iOS is available
 **only via Managed Lost Mode on supervised devices**, not as continuous tracking.
 See [apple-mdm-feasibility.md](apple-mdm-feasibility.md).
 
+## Added in Milestone 10 (location, alerts, reporting)
+
+| Data                     | When written                              | Contains                                   | Who can read |
+| ------------------------ | ----------------------------------------- | ------------------------------------------ | ------------ |
+| Location fixes           | On admin request or a slow interval, only when the per-device location policy is enabled | Latitude, longitude, accuracy, source, timestamp | Admins with `view_reports` |
+
+Location is **opt-in and not continuous**. Every result carries its source and
+timestamp, and the dashboard shows whether it is current, stale, unavailable, or
+permission-restricted. A coordinate is stored **only when a real fix was
+obtained**; "unavailable"/"permission-restricted" results are never stored as
+coordinates. Retention is configurable and expired fixes are deleted. On laptops
+without a location provider the result is "unavailable"; on Android/iOS location
+is available only via Lost Mode.
+
+**Alerts and reports** are **derived** from existing device state (offline, low
+disk, low battery, update available, awaiting enrollment) and aggregate counts;
+they add no new stored personal data.
+
 ## Future milestones
 
 When agents are added, this table will be extended with: foreground application

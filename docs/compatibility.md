@@ -19,7 +19,8 @@ platform · ❓ feasibility not yet confirmed
 | Secure updates                   | 🚧      | 📋      | 📋    | Version reporting + "update available" done; auto self-update not yet          |
 | Policy-controlled screenshots    | ✅      | ❌      | ❌    | Windows agent: scheduled/on-request, encrypted, retained (tested). Not via Android/iOS MDM |
 | Authorized live remote support   | ✅      | ❌      | ❌    | Windows: authorized near-live snapshots + consent indicator (tested). Full-motion: integrate WebRTC/RustDesk |
-| Location                         | ❓      | 🚧      | 🚧    | Android: AMAPI Lost Mode only. iOS: Managed Lost Mode, supervised only. No continuous GPS. Assessed, not live-tested |
+| Location                         | ✅      | 🚧      | 🚧    | Windows: opt-in, source+timestamp+freshness, never invented (tested). Android/iOS: Lost Mode only (assessed) |
+| Alerts / reporting               | ✅      | ✅      | ✅    | Derived fleet alerts + summary report across all devices (tested)              |
 | Remote lock / wipe               | ❓      | 🚧      | 🚧    | Android: AMAPI LOCK/WIPE. iOS: DeviceLock/EraseDevice via MDM. Assessed, not live-tested |
 
 > This table starts almost entirely as 📋/❓ on purpose. Cells move to ✅ only

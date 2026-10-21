@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from sqlalchemy import (
     Boolean,
     DateTime,
+    Float,
     ForeignKey,
     Integer,
     String,
@@ -117,6 +118,51 @@ class Screenshot(Base):
     size_bytes: Mapped[int] = mapped_column(Integer, default=0)
     # Path to the encrypted blob on disk (relative to the screenshots dir).
     storage_path: Mapped[str] = mapped_column(String(255))
+    retention_until: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), index=True
+    )
+
+
+class LocationPolicy(Base):
+    """Per-device location policy. Disabled by default (opt-in, not continuous)."""
+
+    __tablename__ = "location_policy"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    device_id: Mapped[int] = mapped_column(
+        ForeignKey("devices.id", ondelete="CASCADE"), unique=True, index=True
+    )
+    enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    retention_days: Mapped[int] = mapped_column(Integer, default=30)
+    # Set when an admin requests an on-demand location; cleared once the device
+    # responds (with a fix or an "unavailable" status).
+    requested_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow, onupdate=_utcnow
+    )
+
+
+class LocationPoint(Base):
+    """A single location fix. Only stored when a real fix was obtained; an
+    'unavailable' or 'permission_restricted' result is reported but not stored as
+    coordinates (we never invent a location)."""
+
+    __tablename__ = "location_points"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    device_id: Mapped[int] = mapped_column(
+        ForeignKey("devices.id", ondelete="CASCADE"), index=True
+    )
+    captured_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow, index=True
+    )
+    latitude: Mapped[float] = mapped_column(Float)
+    longitude: Mapped[float] = mapped_column(Float)
+    accuracy_m: Mapped[float | None] = mapped_column(Float, nullable=True)
+    # windows_agent | android_lost_mode | ios_lost_mode | manual
+    source: Mapped[str] = mapped_column(String(32), default="windows_agent")
     retention_until: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), index=True
     )

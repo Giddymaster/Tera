@@ -109,6 +109,44 @@ export interface AppleStatus {
   enrollment_models: AppleEnrollmentModel[];
 }
 
+export interface LocationPoint {
+  captured_at: string;
+  latitude: number;
+  longitude: number;
+  accuracy_m: number | null;
+  source: string;
+}
+
+export interface DeviceLocation {
+  enabled: boolean;
+  freshness: "current" | "stale" | "none";
+  latest: LocationPoint | null;
+  history: LocationPoint[];
+}
+
+export interface Alert {
+  device_uid: string;
+  device_name: string;
+  os_type: string;
+  severity: "warning" | "info";
+  type: string;
+  message: string;
+}
+
+export interface ReportSummary {
+  total_devices: number;
+  online: number;
+  offline: number;
+  pending: number;
+  revoked: number;
+  by_os: Record<string, number>;
+  alerts_total: number;
+  alerts_warning: number;
+  active_sessions: number;
+  screenshots_total: number;
+  updates_available: number;
+}
+
 export interface AuditLogOut {
   id: number;
   timestamp: string;

@@ -21,6 +21,8 @@ from app.api import (
     audit,
     auth,
     devices,
+    location,
+    reports,
     screenshots,
     sessions,
 )
@@ -84,6 +86,8 @@ def create_app() -> FastAPI:
     app.include_router(sessions.router)
     app.include_router(android.router)
     app.include_router(apple.router)
+    app.include_router(location.router)
+    app.include_router(reports.router)
 
     @app.get("/health", tags=["meta"])
     async def health() -> dict[str, str]:

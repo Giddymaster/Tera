@@ -23,6 +23,8 @@ from app.models.device import Device
 from app.models.enums import EnrollmentStatus
 from app.models.monitoring import (
     CaptureRequest,
+    LocationPoint,
+    LocationPolicy,
     RemoteSession,
     Screenshot,
     ScreenshotPolicy,
@@ -38,6 +40,7 @@ from app.schemas.device import DeviceOut
 from app.schemas.monitoring import (
     DirectivePolicy,
     DirectivesOut,
+    LocationReportIn,
     ScreenshotOut,
     ScreenshotUploadIn,
 )
@@ -196,6 +199,9 @@ async def directives(session: SessionDep, device: CurrentDevice):
         .where(RemoteSession.device_id == device.id, RemoteSession.status == "active")
         .order_by(RemoteSession.started_at.desc())
     )
+    loc_policy = await session.scalar(
+        select(LocationPolicy).where(LocationPolicy.device_id == device.id)
+    )
     excluded = [
         a.strip()
         for a in ((policy.excluded_apps or "").split(",") if policy else [])
@@ -214,6 +220,8 @@ async def directives(session: SessionDep, device: CurrentDevice):
         session_active=active is not None,
         session_id=active.id if active else None,
         session_capture_interval_seconds=settings.session_capture_interval_seconds,
+        location_enabled=bool(loc_policy.enabled) if loc_policy else False,
+        location_requested=bool(loc_policy.requested_at) if loc_policy else False,
     )
 
 
@@ -286,3 +294,41 @@ async def upload_screenshot(
     # Opportunistically purge anything past its retention window.
     await delete_expired(session)
     return ScreenshotOut.model_validate(shot)
+
+
+@router.post("/location", status_code=status.HTTP_204_NO_CONTENT)
+async def report_location(
+    payload: LocationReportIn, session: SessionDep, device: CurrentDevice
+):
+    """Record a location result from the device.
+
+    A coordinate is stored only when the device actually obtained a fix
+    (status == "ok"). An "unavailable" or "permission_restricted" result clears
+    any pending request but is never stored as coordinates - we do not invent a
+    location.
+    """
+    policy = await session.scalar(
+        select(LocationPolicy).where(LocationPolicy.device_id == device.id)
+    )
+    retention_days = policy.retention_days if policy else 30
+    if policy is not None and policy.requested_at is not None:
+        policy.requested_at = None
+
+    if (
+        payload.status == "ok"
+        and payload.latitude is not None
+        and payload.longitude is not None
+    ):
+        now = datetime.now(timezone.utc)
+        session.add(
+            LocationPoint(
+                device_id=device.id,
+                captured_at=now,
+                latitude=payload.latitude,
+                longitude=payload.longitude,
+                accuracy_m=payload.accuracy_m,
+                source=(payload.source or "windows_agent")[:32],
+                retention_until=now + timedelta(days=retention_days),
+            )
+        )
+    await session.commit()

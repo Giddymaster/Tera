@@ -5,6 +5,8 @@ from app.models.audit import AuditLog
 from app.models.device import Device
 from app.models.monitoring import (
     CaptureRequest,
+    LocationPoint,
+    LocationPolicy,
     RemoteSession,
     Screenshot,
     ScreenshotPolicy,
@@ -17,6 +19,8 @@ __all__ = [
     "AuditLog",
     "CaptureRequest",
     "Device",
+    "LocationPoint",
+    "LocationPolicy",
     "RemoteSession",
     "Screenshot",
     "ScreenshotPolicy",

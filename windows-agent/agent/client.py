@@ -124,5 +124,16 @@ class ApiClient:
         except httpx.HTTPError:
             return False
 
+    def report_location(self, token: str, payload: dict) -> bool:
+        try:
+            resp = self._http.post(
+                f"{self.base_url}/agent/location",
+                json=payload,
+                headers=self._auth(token),
+            )
+            return resp.status_code in (200, 204)
+        except httpx.HTTPError:
+            return False
+
     def close(self) -> None:
         self._http.close()

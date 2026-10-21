@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { ApiError } from "../api/client";
 import { getDevice, getDeviceUsage, getMeta } from "../api/endpoints";
 import type { DeviceOut, DeviceUsageOut, MetaInfo } from "../api/types";
+import { LocationCard } from "../components/LocationCard";
 import { RemoteSupportPanel } from "../components/RemoteSupportPanel";
 import { ScreenshotsPanel } from "../components/ScreenshotsPanel";
 import { StatusBadge } from "../components/StatusBadge";
@@ -14,9 +15,6 @@ const OS_LABEL: Record<string, string> = {
   android: "Android",
   ios: "iOS",
 };
-
-// Sections populated in later milestones.
-const FUTURE_SECTIONS = [{ title: "Location", milestone: "Milestone 10" }];
 
 function diskLabel(device: DeviceOut): string | null {
   if (device.disk_free_gb == null || device.disk_total_gb == null) return null;
@@ -216,17 +214,9 @@ export function DeviceDetailPage() {
         )}
       </section>
 
+      <LocationCard deviceUid={device.device_uid} />
       <ScreenshotsPanel deviceUid={device.device_uid} />
       <RemoteSupportPanel deviceUid={device.device_uid} />
-
-      <div className="future-grid">
-        {FUTURE_SECTIONS.map((s) => (
-          <section className="card card-muted" key={s.title}>
-            <h2 className="card-title">{s.title}</h2>
-            <p className="muted small">Not collected yet. Arrives in {s.milestone}.</p>
-          </section>
-        ))}
-      </div>
     </div>
   );
 }

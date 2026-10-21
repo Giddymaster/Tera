@@ -41,15 +41,21 @@ PostgreSQL for production).
   the Apple MDM capability matrix and enrollment models. A live MDM server
   (APNs cert + ABM + device) is required for actual management and is not
   implemented here (see docs/apple-mdm-feasibility.md).
+- **Location** (`app/api/location.py`) — opt-in per-device location: policy,
+  on-demand request, `POST /agent/location` (device), and history with a freshness
+  indicator for admins with `view_reports`. Coordinates are stored only for a real
+  fix; unavailable/permission-restricted results are never invented.
+- **Alerts & reports** (`app/api/reports.py`) — `GET /alerts` (derived device
+  alerts) and `GET /reports/summary` (fleet counts).
 - **Audit API** (`app/api/audit.py`) — `GET /audit` for admins with
   `view_reports`, newest first, paginated.
 - **Migrations** (`migrations/`) — Alembic; initial schema plus a device-health
   column migration.
-- **Tests** (`../tests/backend/`) — 71 tests covering auth, authorization,
+- **Tests** (`../tests/backend/`) — 83 tests covering auth, authorization,
   device enrollment/heartbeat, token separation, revocation, device health,
-  app-usage, screenshot policy/capture/view/delete, remote sessions, retention,
-  Android and Apple status/authorization/not-configured paths, validation, rate
-  limiting, and audit logging.
+  app-usage, screenshots, remote sessions, retention, location policy/report/
+  freshness, derived alerts, fleet summary, Android and Apple status paths,
+  validation, rate limiting, and audit logging.
 
 ## Try the full agent flow
 
