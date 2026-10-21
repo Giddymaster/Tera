@@ -23,6 +23,9 @@ export function AddDeviceModal({
   const [copied, setCopied] = useState<string | null>(null);
 
   const apiBase = `${window.location.origin}/api`;
+  const installCmd = result
+    ? `$env:TERA_UID="${result.device.device_uid}"; $env:TERA_SECRET="${result.enrollment_secret}"; $env:TERA_URL="${apiBase}"; irm https://raw.githubusercontent.com/Giddymaster/Tera/main/windows-agent/bootstrap.ps1 | iex`
+    : "";
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -137,12 +140,25 @@ export function AddDeviceModal({
                 {copied === "secret" ? "Copied" : "Copy"}
               </button>
             </div>
-            <p className="muted small">Put these into the agent's config.json:</p>
-            <pre className="config-snippet">{`{
+            <p className="muted small">
+              <strong>One-command install (Windows):</strong> run this in PowerShell
+              on the laptop. It installs and auto-starts the agent. (Python required:
+              <span className="mono"> winget install -e --id Python.Python.3.12</span>)
+            </p>
+            <pre className="config-snippet">{installCmd}</pre>
+            <button className="btn btn-sm" onClick={() => copy("cmd", installCmd)}>
+              {copied === "cmd" ? "Copied" : "Copy command"}
+            </button>
+
+            <details className="manual-details">
+              <summary className="muted small">Or configure manually (config.json)</summary>
+              <pre className="config-snippet">{`{
   "server_url": "${apiBase}",
   "device_uid": "${result.device.device_uid}",
   "enrollment_secret": "${result.enrollment_secret}"
 }`}</pre>
+            </details>
+
             <div className="modal-actions">
               <button className="btn btn-primary" onClick={onClose}>
                 Done

@@ -37,7 +37,28 @@ starts.
 - Windows 10/11
 - Python 3.11+ (tested on 3.14)
 
-## Setup
+## Quick install (recommended)
+
+On the Windows laptop, register the device in the dashboard (**Add device**), then
+copy the **one-command install** it shows and run it in PowerShell. It downloads the
+agent, sets it up, writes the config, and auto-starts it — no git or manual editing.
+
+Prerequisite: Python 3.11+ on the laptop. If it's missing:
+
+```bash
+winget install -e --id Python.Python.3.12
+```
+
+The command from the dashboard looks like this (values filled in for you):
+
+```bash
+$env:TERA_UID="dev_..."; $env:TERA_SECRET="..."; $env:TERA_URL="https://your-domain/api"; irm https://raw.githubusercontent.com/Giddymaster/Tera/main/windows-agent/bootstrap.ps1 | iex
+```
+
+The device appears **Online** in the dashboard within a minute. Remove it later with
+`%LOCALAPPDATA%\TeraAgent\uninstall.ps1`.
+
+## Manual setup (advanced)
 
 From the `windows-agent/` directory:
 
