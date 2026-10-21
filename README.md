@@ -140,5 +140,10 @@ tested on the relevant operating system.
 
 ## License
 
-To be decided before the first public release. Until a `LICENSE` file is added,
-treat this as all-rights-reserved and do not redistribute.
+Released under the [MIT License](LICENSE). You may use, modify, and redistribute
+it, including commercially, provided the copyright notice is kept. The software is
+provided "as is", without warranty.
+
+**Note:** the MIT license covers the code. It does not absolve you of the legal
+obligations of monitoring people (notice, consent, data protection), which vary by
+jurisdiction. Deploy responsibly.
