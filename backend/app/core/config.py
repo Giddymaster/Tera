@@ -70,6 +70,13 @@ class Settings(BaseSettings):
     android_project_id: str = ""
     android_enterprise_name: str = ""  # e.g. "enterprises/LC0123456789"
     android_sa_json: str = ""  # path to a service-account JSON key, or inline JSON
+
+    # ---- Apple MDM (Milestone 9) ----
+    # Set the MDM server URL to mark Apple management as configured. A full MDM
+    # server (APNs cert + ABM + device) is required for live use; see
+    # docs/apple-mdm-feasibility.md.
+    apple_mdm_server_url: str = ""
+    apple_mdm_push_topic: str = ""  # APNs topic from the MDM push certificate
     # A device is considered online only if its last heartbeat is this recent.
     online_threshold_seconds: int = Field(default=300, ge=30)
 

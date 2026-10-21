@@ -37,15 +37,19 @@ PostgreSQL for production).
   available) plus device list, enrollment token, and commands, gated on
   configuration (see docs/android-feasibility.md). The live path is untested
   without a Google project and device.
+- **Apple** (`app/api/apple.py`, `app/core/apple.py`) — `GET /apple/status` with
+  the Apple MDM capability matrix and enrollment models. A live MDM server
+  (APNs cert + ABM + device) is required for actual management and is not
+  implemented here (see docs/apple-mdm-feasibility.md).
 - **Audit API** (`app/api/audit.py`) — `GET /audit` for admins with
   `view_reports`, newest first, paginated.
 - **Migrations** (`migrations/`) — Alembic; initial schema plus a device-health
   column migration.
-- **Tests** (`../tests/backend/`) — 69 tests covering auth, authorization,
+- **Tests** (`../tests/backend/`) — 71 tests covering auth, authorization,
   device enrollment/heartbeat, token separation, revocation, device health,
   app-usage, screenshot policy/capture/view/delete, remote sessions, retention,
-  Android status/authorization/not-configured paths, validation, rate limiting,
-  and audit logging.
+  Android and Apple status/authorization/not-configured paths, validation, rate
+  limiting, and audit logging.
 
 ## Try the full agent flow
 

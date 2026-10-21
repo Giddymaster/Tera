@@ -95,6 +95,20 @@ export interface AndroidStatus {
   commands: string[];
 }
 
+export interface AppleEnrollmentModel {
+  name: string;
+  supervised: boolean;
+  note: string;
+}
+
+export interface AppleStatus {
+  configured: boolean;
+  server_url: string | null;
+  push_topic: string | null;
+  capabilities: Record<string, boolean | string>;
+  enrollment_models: AppleEnrollmentModel[];
+}
+
 export interface AuditLogOut {
   id: number;
   timestamp: string;

@@ -103,6 +103,18 @@ and are Windows-agent-only features. Location on Android is available **only via
 Lost Mode**, not as continuous tracking. See
 [android-feasibility.md](android-feasibility.md).
 
+## Added in Milestone 9 (Apple MDM)
+
+When an Apple MDM is configured, iPhones/iPads are managed via Apple's MDM
+protocol. Data available to admins with `view_devices` is **device inventory,
+OS/security info, and compliance** from standard MDM queries. Admins with
+`manage_devices` can issue MDM actions (lock, wipe, Managed Lost Mode).
+
+On iOS the system does **not** collect screenshots, live screen view, app usage,
+or keystrokes — Apple MDM does not permit these. Location on iOS is available
+**only via Managed Lost Mode on supervised devices**, not as continuous tracking.
+See [apple-mdm-feasibility.md](apple-mdm-feasibility.md).
+
 ## Future milestones
 
 When agents are added, this table will be extended with: foreground application

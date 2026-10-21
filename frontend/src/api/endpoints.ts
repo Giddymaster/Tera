@@ -4,6 +4,7 @@ import { apiBlob, apiRequest, tokenStore } from "./client";
 import type {
   AdminOut,
   AndroidStatus,
+  AppleStatus,
   AuditLogOut,
   DeviceCreate,
   DeviceCreateResponse,
@@ -118,4 +119,9 @@ export function getAndroidStatus(): Promise<AndroidStatus> {
 
 export function getAndroidDevices(): Promise<Record<string, unknown>[]> {
   return apiRequest<Record<string, unknown>[]>("/android/devices");
+}
+
+// ---- Apple MDM ----
+export function getAppleStatus(): Promise<AppleStatus> {
+  return apiRequest<AppleStatus>("/apple/status");
 }
