@@ -23,6 +23,7 @@ from app.api import (
     devices,
     location,
     reports,
+    rustdesk,
     screenshots,
     sessions,
 )
@@ -110,6 +111,7 @@ def create_app() -> FastAPI:
     app.include_router(apple.router)
     app.include_router(location.router)
     app.include_router(reports.router)
+    app.include_router(rustdesk.router)
 
     @app.get("/health", tags=["meta"])
     async def health() -> dict[str, str]:

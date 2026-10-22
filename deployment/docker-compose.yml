@@ -57,8 +57,38 @@ services:
     depends_on:
       - backend
 
+  # Self-hosted RustDesk server for real remote control (Milestone: RustDesk).
+  # hbbs = ID/rendezvous server, hbbr = relay. Clients connect through these,
+  # not RustDesk's public servers. Open ports 21115-21119 TCP and 21116/udp on
+  # the host firewall. After first start, read the public key and set
+  # RUSTDESK_KEY (see docs/deployment.md), then redeploy.
+  hbbr:
+    image: rustdesk/rustdesk-server:latest
+    command: hbbr
+    restart: unless-stopped
+    ports:
+      - "21117:21117"
+      - "21119:21119"
+    volumes:
+      - rustdesk_data:/root
+
+  hbbs:
+    image: rustdesk/rustdesk-server:latest
+    command: hbbs -r ${RUSTDESK_HOST}:21117
+    restart: unless-stopped
+    ports:
+      - "21115:21115"
+      - "21116:21116"
+      - "21116:21116/udp"
+      - "21118:21118"
+    volumes:
+      - rustdesk_data:/root
+    depends_on:
+      - hbbr
+
 volumes:
   pgdata:
   appdata:
   caddy_data:
   caddy_config:
+  rustdesk_data:

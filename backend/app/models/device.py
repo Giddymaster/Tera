@@ -53,6 +53,11 @@ class Device(Base):
     battery_percent: Mapped[int | None] = mapped_column(Integer, nullable=True)
     power_plugged: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
+    # RustDesk remote control: the device's RustDesk ID and its unattended
+    # password (encrypted at rest; only revealed to authorized admins).
+    rustdesk_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    rustdesk_password_enc: Mapped[str | None] = mapped_column(String(512), nullable=True)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow
     )

@@ -39,6 +39,15 @@ export interface DeviceOut {
   disk_total_gb: number | null;
   battery_percent: number | null;
   power_plugged: boolean | null;
+  rustdesk_id: string | null;
+}
+
+export interface RustDeskInfo {
+  rustdesk_id: string;
+  password: string | null;
+  host: string;
+  key: string;
+  enabled: boolean;
 }
 
 export interface AppUsageOut {

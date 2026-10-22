@@ -49,6 +49,7 @@ class DeviceOut(BaseModel):
     disk_total_gb: float | None = None
     battery_percent: int | None = None
     power_plugged: bool | None = None
+    rustdesk_id: str | None = None
 
     @field_serializer("created_at", "updated_at", "last_seen_at")
     def _ser_dt(self, value: datetime | None) -> str | None:

@@ -90,6 +90,12 @@ class DirectivePolicy(BaseModel):
     excluded_apps: list[str]
 
 
+class DirectiveRustDesk(BaseModel):
+    enabled: bool = False
+    host: str = ""
+    key: str = ""
+
+
 class DirectivesOut(BaseModel):
     screenshot_policy: DirectivePolicy
     capture_requested: bool
@@ -98,6 +104,7 @@ class DirectivesOut(BaseModel):
     session_capture_interval_seconds: int
     location_enabled: bool = False
     location_requested: bool = False
+    rustdesk: DirectiveRustDesk = DirectiveRustDesk()
 
 
 # --------------------------------------------------------------------------- #

@@ -30,15 +30,18 @@ from app.models.monitoring import (
     ScreenshotPolicy,
 )
 from app.models.usage import AppUsage
+from app.core.encryption import encrypt_bytes
 from app.schemas.agent import (
     EnrollRequest,
     EnrollResponse,
     HeartbeatRequest,
     HeartbeatResponse,
+    RustDeskReportIn,
 )
 from app.schemas.device import DeviceOut
 from app.schemas.monitoring import (
     DirectivePolicy,
+    DirectiveRustDesk,
     DirectivesOut,
     LocationReportIn,
     ScreenshotOut,
@@ -222,6 +225,11 @@ async def directives(session: SessionDep, device: CurrentDevice):
         session_capture_interval_seconds=settings.session_capture_interval_seconds,
         location_enabled=bool(loc_policy.enabled) if loc_policy else False,
         location_requested=bool(loc_policy.requested_at) if loc_policy else False,
+        rustdesk=DirectiveRustDesk(
+            enabled=bool(settings.rustdesk_host),
+            host=settings.rustdesk_host,
+            key=settings.rustdesk_key,
+        ),
     )
 
 
@@ -331,4 +339,18 @@ async def report_location(
                 retention_until=now + timedelta(days=retention_days),
             )
         )
+    await session.commit()
+
+
+@router.post("/rustdesk", status_code=status.HTTP_204_NO_CONTENT)
+async def report_rustdesk(
+    payload: RustDeskReportIn, session: SessionDep, device: CurrentDevice
+):
+    """The agent reports its RustDesk ID and unattended password.
+
+    The password is encrypted at rest and only revealed to admins with the
+    live-session permission.
+    """
+    device.rustdesk_id = payload.rustdesk_id
+    device.rustdesk_password_enc = encrypt_bytes(payload.password.encode()).decode()
     await session.commit()

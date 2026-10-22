@@ -108,6 +108,29 @@ but the hardware and power — often the best fit for sensitive company data.
   private bucket. Test a restore periodically (see [backups.md](backups.md)).
 - Schedule `scripts/retention_cleanup.py` (daily) to enforce retention.
 
+## RustDesk remote control (self-hosted)
+
+The deployment includes a self-hosted RustDesk server (`hbbs` + `hbbr`) so real
+remote-control traffic flows through your box, not RustDesk's public servers.
+
+1. **Open the firewall** (if you use one) for ports **21115-21119 TCP** and
+   **21116 UDP**.
+2. In `.env.production`, set `RUSTDESK_HOST` to this server's public host/IP and
+   leave `RUSTDESK_KEY` blank for the first start. Deploy.
+3. **Read the generated public key** and put it in `RUSTDESK_KEY`, then redeploy:
+   ```bash
+   docker compose --env-file .env.production exec hbbs cat /root/id_ed25519.pub
+   # paste into RUSTDESK_KEY in .env.production, then:
+   docker compose --env-file .env.production up -d
+   ```
+4. With `RUSTDESK_HOST` and `RUSTDESK_KEY` set, the agent (next milestone) will
+   configure RustDesk on each device against your server and report its ID; the
+   device page then shows a **Remote control (RustDesk)** section with the ID and
+   unattended password for authorized admins.
+
+The password is encrypted at rest and only revealed to admins with the
+live-session permission, and each reveal is audit-logged.
+
 ## Staged rollout
 
 1. **Local simulation** — run the stack locally; exercise login, enrollment,

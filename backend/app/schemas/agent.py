@@ -42,3 +42,8 @@ class HeartbeatResponse(BaseModel):
     server_time: datetime
     latest_agent_version: str
     update_available: bool = False
+
+
+class RustDeskReportIn(BaseModel):
+    rustdesk_id: str = Field(min_length=1, max_length=32)
+    password: str = Field(min_length=1, max_length=128)

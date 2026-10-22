@@ -15,6 +15,7 @@ import type {
   MetaInfo,
   RemoteSession,
   ReportSummary,
+  RustDeskInfo,
   ScreenshotMeta,
   ScreenshotPolicy,
   TokenResponse,
@@ -162,4 +163,9 @@ export function getAlerts(): Promise<Alert[]> {
 
 export function getReportSummary(): Promise<ReportSummary> {
   return apiRequest<ReportSummary>("/reports/summary");
+}
+
+// ---- RustDesk remote control ----
+export function getRustDesk(uid: string): Promise<RustDeskInfo> {
+  return apiRequest<RustDeskInfo>(`/devices/${uid}/rustdesk`);
 }

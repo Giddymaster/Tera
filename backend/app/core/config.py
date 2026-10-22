@@ -71,6 +71,12 @@ class Settings(BaseSettings):
     android_enterprise_name: str = ""  # e.g. "enterprises/LC0123456789"
     android_sa_json: str = ""  # path to a service-account JSON key, or inline JSON
 
+    # ---- RustDesk remote control (self-hosted) ----
+    # Set the host (and the hbbs public key) to have agents configure RustDesk
+    # against your own RustDesk server. Blank = feature off.
+    rustdesk_host: str = ""
+    rustdesk_key: str = ""
+
     # ---- Apple MDM (Milestone 9) ----
     # Set the MDM server URL to mark Apple management as configured. A full MDM
     # server (APNs cert + ABM + device) is required for live use; see

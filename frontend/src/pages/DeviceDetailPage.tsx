@@ -11,6 +11,7 @@ import {
 import type { DeviceOut, DeviceUsageOut, MetaInfo } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { LocationCard } from "../components/LocationCard";
+import { RemoteControlCard } from "../components/RemoteControlCard";
 import { RemoteSupportPanel } from "../components/RemoteSupportPanel";
 import { ScreenshotsPanel } from "../components/ScreenshotsPanel";
 import { StatusBadge } from "../components/StatusBadge";
@@ -266,6 +267,10 @@ export function DeviceDetailPage() {
       <LocationCard deviceUid={device.device_uid} />
       <ScreenshotsPanel deviceUid={device.device_uid} />
       <RemoteSupportPanel deviceUid={device.device_uid} />
+      <RemoteControlCard
+        deviceUid={device.device_uid}
+        rustdeskId={device.rustdesk_id}
+      />
     </div>
   );
 }
