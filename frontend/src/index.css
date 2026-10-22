@@ -624,6 +624,26 @@ h2 {
 .usage-app {
   font-weight: 500;
 }
+.shot-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0.75rem 0 0.25rem;
+}
+.shot-selectall,
+.shot-check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.shot figcaption {
+  gap: 0.5rem;
+}
+.shot-selected {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
 .update-badge {
   display: inline-block;
   margin-left: 0.5rem;

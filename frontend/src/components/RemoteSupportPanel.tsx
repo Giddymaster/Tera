@@ -47,7 +47,7 @@ export function RemoteSupportPanel({ deviceUid }: { deviceUid: string }) {
         })
         .catch(() => undefined);
     void tick();
-    const timer = setInterval(tick, 3000);
+    const timer = setInterval(tick, 1500);
     return () => {
       active_ = false;
       clearInterval(timer);
