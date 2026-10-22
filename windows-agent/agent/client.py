@@ -135,5 +135,16 @@ class ApiClient:
         except httpx.HTTPError:
             return False
 
+    def report_rustdesk(self, token: str, rustdesk_id: str, password: str) -> bool:
+        try:
+            resp = self._http.post(
+                f"{self.base_url}/agent/rustdesk",
+                json={"rustdesk_id": rustdesk_id, "password": password},
+                headers=self._auth(token),
+            )
+            return resp.status_code in (200, 204)
+        except httpx.HTTPError:
+            return False
+
     def close(self) -> None:
         self._http.close()

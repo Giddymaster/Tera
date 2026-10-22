@@ -27,6 +27,7 @@ class StateStore:
                 pass
         self._data.setdefault("device_token", None)
         self._data.setdefault("pending_usage", [])
+        self._data.setdefault("rustdesk_id", None)
 
     def _save(self) -> None:
         tmp = self.path.with_suffix(".tmp")
@@ -48,4 +49,13 @@ class StateStore:
     def save_pending_usage(self, entries: list[dict]) -> None:
         with self._lock:
             self._data["pending_usage"] = entries
+            self._save()
+
+    @property
+    def rustdesk_id(self) -> str | None:
+        return self._data.get("rustdesk_id")
+
+    def set_rustdesk_id(self, rustdesk_id: str) -> None:
+        with self._lock:
+            self._data["rustdesk_id"] = rustdesk_id
             self._save()

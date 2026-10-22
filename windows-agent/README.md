@@ -144,6 +144,25 @@ deliberate future step, not yet implemented.
 | `usage_flush_interval_seconds`| How often to send usage                | 120     |
 | `sample_interval_seconds`   | How often to sample the foreground app   | 5       |
 
+## Remote control (RustDesk) — best-effort, untested
+
+When the server has RustDesk enabled (`RUSTDESK_HOST` + `RUSTDESK_KEY`), the agent
+downloads RustDesk, points it at your self-hosted server, sets an unattended
+password, starts it, reads its ID, and reports the ID + password to the backend
+(shown on the device page for admins with the live-session permission).
+
+This is **best-effort and not tested end-to-end** — RustDesk's CLI and config vary
+by version, so expect to adjust `agent/rustdesk.py` on a real device. Each step is
+guarded so a failure only logs; the agent keeps running. **Pre-login (service)
+unattended access** needs RustDesk installed as a Windows service, which requires
+administrator rights — a one-time manual step on each device:
+
+```bash
+%LOCALAPPDATA%\TeraAgent\rustdesk.exe --install-service   # run elevated once
+```
+
+Without that, remote control works while a user is signed in.
+
 ## Status and limitations
 
 This is a **prototype**, suitable for development and a supervised test laptop.

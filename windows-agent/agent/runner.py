@@ -21,12 +21,15 @@ from .config import load_config
 from .foreground import foreground_process_name, idle_seconds
 from .health import collect_health
 from .location import collect_location
+from .rustdesk import setup as rustdesk_setup
 from .state import StateStore
 from .tracker import UsageTracker, merge_entries
 
 # Location is reported on request, or at most this often when enabled (not
 # continuous).
 LOCATION_INTERVAL_SECONDS = 15 * 60
+# Retry RustDesk setup at most this often until it succeeds.
+RUSTDESK_RETRY_SECONDS = 10 * 60
 
 log = logging.getLogger("agent")
 
@@ -93,6 +96,8 @@ def run(config_path: str = "config.json") -> int:
     last_scheduled_capture = 0.0
     last_session_capture = 0.0
     last_location_report = 0.0
+    last_rustdesk_attempt = 0.0
+    install_dir = Path(config_path).resolve().parent
 
     def do_capture(trigger: str, session_id: int | None = None) -> None:
         shot = capture_jpeg()
@@ -212,6 +217,24 @@ def run(config_path: str = "config.json") -> int:
                 ):
                     client.report_location(token, collect_location())
                     last_location_report = now
+
+                # RustDesk: configure once when enabled, then report the ID.
+                rd = directives.get("rustdesk") or {}
+                if (
+                    rd.get("enabled")
+                    and rd.get("host")
+                    and rd.get("key")
+                    and state.rustdesk_id is None
+                    and now - last_rustdesk_attempt >= RUSTDESK_RETRY_SECONDS
+                ):
+                    last_rustdesk_attempt = now
+                    log.info("Configuring RustDesk for remote control...")
+                    result = rustdesk_setup(install_dir, rd["host"], rd["key"])
+                    if result and client.report_rustdesk(token, result[0], result[1]):
+                        state.set_rustdesk_id(result[0])
+                        log.info("RustDesk configured; ID %s reported.", result[0])
+                    else:
+                        log.warning("RustDesk setup incomplete; will retry later.")
             except Exception:  # noqa: BLE001 - keep running through transient errors
                 log.exception("Error during agent cycle; continuing.")
     except KeyboardInterrupt:
