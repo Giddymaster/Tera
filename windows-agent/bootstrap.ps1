@@ -73,8 +73,9 @@ $json = $config | ConvertTo-Json
     $json,
     (New-Object System.Text.UTF8Encoding($false))
 )
-# Clear any previous enrollment so it enrolls fresh against this server.
-Remove-Item -ErrorAction SilentlyContinue (Join-Path $InstallDir ".agent_state.json")
+# Keep any existing enrollment (.agent_state.json) so re-running this just updates
+# the agent code/config without re-enrolling. To re-enroll as a different device,
+# run uninstall.ps1 -Purge first.
 
 Write-Host "Installing auto-start task and starting the agent..."
 & powershell -ExecutionPolicy Bypass -File (Join-Path $InstallDir "install.ps1") -TaskName $TaskName
