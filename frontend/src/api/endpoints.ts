@@ -86,12 +86,22 @@ export function requestCapture(uid: string): Promise<{ status: string }> {
   });
 }
 
-export function listScreenshots(uid: string, limit = 50): Promise<ScreenshotMeta[]> {
-  return apiRequest<ScreenshotMeta[]>(`/devices/${uid}/screenshots?limit=${limit}`);
+export function listScreenshots(
+  uid: string,
+  limit = 50,
+  offset = 0,
+): Promise<ScreenshotMeta[]> {
+  return apiRequest<ScreenshotMeta[]>(
+    `/devices/${uid}/screenshots?limit=${limit}&offset=${offset}`,
+  );
 }
 
 export function deleteScreenshot(id: number): Promise<void> {
   return apiRequest<void>(`/screenshots/${id}`, { method: "DELETE" });
+}
+
+export function deleteAllScreenshots(uid: string): Promise<void> {
+  return apiRequest<void>(`/devices/${uid}/screenshots`, { method: "DELETE" });
 }
 
 export function getScreenshotImage(id: number): Promise<Blob> {

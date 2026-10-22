@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import {
+  deleteAllScreenshots,
   deleteScreenshot,
   getScreenshotPolicy,
   listScreenshots,
   requestCapture,
   updateScreenshotPolicy,
 } from "../api/endpoints";
+
+const PAGE = 50;
 import type { ScreenshotMeta, ScreenshotPolicy } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { relativeTime } from "../lib/format";
@@ -20,15 +23,46 @@ export function ScreenshotsPanel({ deviceUid }: { deviceUid: string }) {
   const [shots, setShots] = useState<ScreenshotMeta[]>([]);
   const [note, setNote] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [hasMore, setHasMore] = useState(false);
 
   const loadShots = useCallback(async () => {
     if (!canView) return;
     try {
-      setShots(await listScreenshots(deviceUid));
+      const page = await listScreenshots(deviceUid, PAGE, 0);
+      setShots(page);
+      setHasMore(page.length === PAGE);
+      setSelected(new Set());
     } catch {
       /* ignore */
     }
   }, [deviceUid, canView]);
+
+  async function loadMore() {
+    try {
+      const page = await listScreenshots(deviceUid, PAGE, shots.length);
+      setShots((prev) => [...prev, ...page]);
+      setHasMore(page.length === PAGE);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  async function removeAll() {
+    if (
+      !window.confirm(
+        "Delete ALL screenshots for this device? This cannot be undone.",
+      )
+    ) {
+      return;
+    }
+    try {
+      await deleteAllScreenshots(deviceUid);
+      await loadShots();
+      setNote("All screenshots deleted.");
+    } catch {
+      setNote("Could not delete all screenshots.");
+    }
+  }
 
   useEffect(() => {
     getScreenshotPolicy(deviceUid).then(setPolicy).catch(() => undefined);
@@ -196,17 +230,22 @@ export function ScreenshotsPanel({ deviceUid }: { deviceUid: string }) {
                 onChange={toggleAll}
               />
               <span className="muted small">
-                Select all ({shots.length})
+                Select all ({shots.length} loaded{hasMore ? "+" : ""})
               </span>
             </label>
-            {selected.size > 0 && (
-              <button
-                className="btn btn-sm btn-danger"
-                onClick={() => void deleteSelected()}
-              >
-                Delete selected ({selected.size})
+            <div className="card-actions">
+              {selected.size > 0 && (
+                <button
+                  className="btn btn-sm btn-danger"
+                  onClick={() => void deleteSelected()}
+                >
+                  Delete selected ({selected.size})
+                </button>
+              )}
+              <button className="btn btn-sm btn-danger" onClick={() => void removeAll()}>
+                Delete all
               </button>
-            )}
+            </div>
           </div>
           <div className="shot-grid">
             {shots.map((s) => (
@@ -233,6 +272,13 @@ export function ScreenshotsPanel({ deviceUid }: { deviceUid: string }) {
               </figure>
             ))}
           </div>
+          {hasMore && (
+            <div className="load-more">
+              <button className="btn btn-sm" onClick={() => void loadMore()}>
+                Load more
+              </button>
+            </div>
+          )}
         </>
       )}
     </section>

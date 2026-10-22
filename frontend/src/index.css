@@ -644,6 +644,11 @@ h2 {
   outline: 2px solid var(--primary);
   outline-offset: 1px;
 }
+.load-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.9rem;
+}
 .update-badge {
   display: inline-block;
   margin-left: 0.5rem;

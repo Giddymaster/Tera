@@ -11,7 +11,7 @@ from __future__ import annotations
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
 from app.api.deps import SessionDep, client_ip, require_permission
 from app.core.audit import record_action
@@ -120,6 +120,7 @@ async def list_screenshots(
     session: SessionDep,
     admin: ViewScreenshots,
     limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
 ):
     device = await _device_or_404(session, device_uid)
     rows = (
@@ -128,9 +129,41 @@ async def list_screenshots(
             .where(Screenshot.device_id == device.id)
             .order_by(Screenshot.captured_at.desc())
             .limit(limit)
+            .offset(offset)
         )
     ).scalars().all()
     return list(rows)
+
+
+@router.delete(
+    "/devices/{device_uid}/screenshots", status_code=status.HTTP_204_NO_CONTENT
+)
+async def delete_all_screenshots(
+    device_uid: str, request: Request, session: SessionDep, admin: ViewScreenshots
+):
+    """Delete every screenshot for a device (files on disk and rows)."""
+    device = await _device_or_404(session, device_uid)
+    rows = (
+        await session.execute(
+            select(Screenshot).where(Screenshot.device_id == device.id)
+        )
+    ).scalars().all()
+    for row in rows:
+        delete_blob(row.storage_path)
+    await session.execute(
+        delete(Screenshot).where(Screenshot.device_id == device.id)
+    )
+    await record_action(
+        session,
+        action="screenshot.delete_all",
+        actor=admin,
+        target_type="device",
+        target_id=device.device_uid,
+        detail=f"count={len(rows)}",
+        ip_address=client_ip(request),
+        commit=False,
+    )
+    await session.commit()
 
 
 @router.get("/screenshots/{screenshot_id}/image")
