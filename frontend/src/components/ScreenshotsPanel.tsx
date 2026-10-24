@@ -8,6 +8,7 @@ import {
   requestCapture,
   updateScreenshotPolicy,
 } from "../api/endpoints";
+import { ApiError } from "../api/client";
 import type { ScreenshotMeta, ScreenshotPolicy } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { relativeTime } from "../lib/format";
@@ -123,13 +124,22 @@ export function ScreenshotsPanel({ deviceUid }: { deviceUid: string }) {
   }
 
   async function remove(id: number) {
-    await deleteScreenshot(id);
-    setShots((s) => s.filter((x) => x.id !== id));
-    setSelected((prev) => {
-      const next = new Set(prev);
-      next.delete(id);
-      return next;
-    });
+    try {
+      await deleteScreenshot(id);
+      setShots((s) => s.filter((x) => x.id !== id));
+      setSelected((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+      setTotal((t) => (t != null ? Math.max(0, t - 1) : t));
+    } catch (e) {
+      setNote(
+        e instanceof ApiError
+          ? `Could not delete screenshot: ${e.detail}`
+          : "Could not delete screenshot.",
+      );
+    }
   }
 
   function toggle(id: number) {
@@ -154,15 +164,30 @@ export function ScreenshotsPanel({ deviceUid }: { deviceUid: string }) {
     ) {
       return;
     }
-    for (const id of selected) {
+    const ids = Array.from(selected);
+    const done: number[] = [];
+    let failDetail: string | null = null;
+    for (const id of ids) {
       try {
         await deleteScreenshot(id);
-      } catch {
-        /* skip failures */
+        done.push(id);
+      } catch (e) {
+        failDetail = e instanceof ApiError ? e.detail : "request failed";
       }
     }
+    // Remove exactly what was deleted from the current view, so the gallery
+    // reflects the deletion even when more pages exist behind it.
+    if (done.length > 0) {
+      const removed = new Set(done);
+      setShots((s) => s.filter((x) => !removed.has(x.id)));
+      setTotal((t) => (t != null ? Math.max(0, t - done.length) : t));
+    }
     setSelected(new Set());
-    await loadShots();
+    setNote(
+      failDetail
+        ? `Deleted ${done.length} of ${ids.length}. Some failed: ${failDetail}`
+        : `Deleted ${done.length} screenshot(s).`,
+    );
   }
 
   function set<K extends keyof ScreenshotPolicy>(key: K, value: ScreenshotPolicy[K]) {
