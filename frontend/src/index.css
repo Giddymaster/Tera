@@ -649,6 +649,28 @@ h2 {
   justify-content: center;
   margin-top: 0.9rem;
 }
+.shot-imgbtn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.lightbox {
+  max-width: 92vw;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.lightbox-img {
+  max-width: 90vw;
+  max-height: 80vh;
+  width: auto;
+  height: auto;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
 .update-badge {
   display: inline-block;
   margin-left: 0.5rem;

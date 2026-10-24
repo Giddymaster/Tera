@@ -24,6 +24,7 @@ export function ScreenshotsPanel({ deviceUid }: { deviceUid: string }) {
   const [note, setNote] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [hasMore, setHasMore] = useState(false);
+  const [viewing, setViewing] = useState<number | null>(null);
 
   const loadShots = useCallback(async () => {
     if (!canView) return;
@@ -253,7 +254,14 @@ export function ScreenshotsPanel({ deviceUid }: { deviceUid: string }) {
                 className={`shot${selected.has(s.id) ? " shot-selected" : ""}`}
                 key={s.id}
               >
-                <ScreenshotImage id={s.id} className="shot-img" />
+                <button
+                  type="button"
+                  className="shot-imgbtn"
+                  onClick={() => setViewing(s.id)}
+                  title="View full size"
+                >
+                  <ScreenshotImage id={s.id} className="shot-img" />
+                </button>
                 <figcaption>
                   <label className="shot-check">
                     <input
@@ -280,6 +288,29 @@ export function ScreenshotsPanel({ deviceUid }: { deviceUid: string }) {
             </div>
           )}
         </>
+      )}
+
+      {viewing !== null && (
+        <div className="modal-backdrop" onClick={() => setViewing(null)}>
+          <div className="lightbox" onClick={(e) => e.stopPropagation()}>
+            <ScreenshotImage id={viewing} className="lightbox-img" />
+            <div className="modal-actions">
+              <button
+                className="btn btn-danger"
+                onClick={() => {
+                  const id = viewing;
+                  setViewing(null);
+                  if (id !== null) void remove(id);
+                }}
+              >
+                Delete
+              </button>
+              <button className="btn btn-primary" onClick={() => setViewing(null)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </section>
   );
