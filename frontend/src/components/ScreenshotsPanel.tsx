@@ -2,17 +2,18 @@ import { useCallback, useEffect, useState } from "react";
 import {
   deleteAllScreenshots,
   deleteScreenshot,
+  getScreenshotCount,
   getScreenshotPolicy,
   listScreenshots,
   requestCapture,
   updateScreenshotPolicy,
 } from "../api/endpoints";
-
-const PAGE = 50;
 import type { ScreenshotMeta, ScreenshotPolicy } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { relativeTime } from "../lib/format";
 import { ScreenshotImage } from "./ScreenshotImage";
+
+const PAGE = 50;
 
 export function ScreenshotsPanel({ deviceUid }: { deviceUid: string }) {
   const { hasPermission } = useAuth();
@@ -25,6 +26,7 @@ export function ScreenshotsPanel({ deviceUid }: { deviceUid: string }) {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [hasMore, setHasMore] = useState(false);
   const [viewing, setViewing] = useState<number | null>(null);
+  const [total, setTotal] = useState<number | null>(null);
 
   const loadShots = useCallback(async () => {
     if (!canView) return;
@@ -33,6 +35,9 @@ export function ScreenshotsPanel({ deviceUid }: { deviceUid: string }) {
       setShots(page);
       setHasMore(page.length === PAGE);
       setSelected(new Set());
+      getScreenshotCount(deviceUid)
+        .then((c) => setTotal(c.count))
+        .catch(() => undefined);
     } catch {
       /* ignore */
     }
@@ -64,6 +69,33 @@ export function ScreenshotsPanel({ deviceUid }: { deviceUid: string }) {
       setNote("Could not delete all screenshots.");
     }
   }
+
+  const viewIndex =
+    viewing === null ? -1 : shots.findIndex((s) => s.id === viewing);
+
+  function showPrev() {
+    if (viewIndex > 0) setViewing(shots[viewIndex - 1].id);
+  }
+
+  function showNext() {
+    if (viewIndex >= 0 && viewIndex < shots.length - 1) {
+      setViewing(shots[viewIndex + 1].id);
+    }
+  }
+
+  // Arrow keys navigate, Escape closes the full-size viewer.
+  useEffect(() => {
+    if (viewing === null) return;
+    const idx = shots.findIndex((s) => s.id === viewing);
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "ArrowLeft" && idx > 0) setViewing(shots[idx - 1].id);
+      else if (e.key === "ArrowRight" && idx < shots.length - 1)
+        setViewing(shots[idx + 1].id);
+      else if (e.key === "Escape") setViewing(null);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [viewing, shots]);
 
   useEffect(() => {
     getScreenshotPolicy(deviceUid).then(setPolicy).catch(() => undefined);
@@ -231,7 +263,8 @@ export function ScreenshotsPanel({ deviceUid }: { deviceUid: string }) {
                 onChange={toggleAll}
               />
               <span className="muted small">
-                Select all ({shots.length} loaded{hasMore ? "+" : ""})
+                Select all · showing {shots.length}
+                {total != null ? ` of ${total}` : ""}
               </span>
             </label>
             <div className="card-actions">
@@ -248,6 +281,7 @@ export function ScreenshotsPanel({ deviceUid }: { deviceUid: string }) {
               </button>
             </div>
           </div>
+          <div className="shot-scroll">
           <div className="shot-grid">
             {shots.map((s) => (
               <figure
@@ -280,6 +314,7 @@ export function ScreenshotsPanel({ deviceUid }: { deviceUid: string }) {
               </figure>
             ))}
           </div>
+          </div>
           {hasMore && (
             <div className="load-more">
               <button className="btn btn-sm" onClick={() => void loadMore()}>
@@ -293,6 +328,25 @@ export function ScreenshotsPanel({ deviceUid }: { deviceUid: string }) {
       {viewing !== null && (
         <div className="modal-backdrop" onClick={() => setViewing(null)}>
           <div className="lightbox" onClick={(e) => e.stopPropagation()}>
+            <div className="lightbox-head">
+              <button
+                className="btn btn-sm"
+                disabled={viewIndex <= 0}
+                onClick={showPrev}
+              >
+                ‹ Prev
+              </button>
+              <span className="muted small">
+                {viewIndex + 1} / {shots.length}
+              </span>
+              <button
+                className="btn btn-sm"
+                disabled={viewIndex < 0 || viewIndex >= shots.length - 1}
+                onClick={showNext}
+              >
+                Next ›
+              </button>
+            </div>
             <ScreenshotImage id={viewing} className="lightbox-img" />
             <div className="modal-actions">
               <button

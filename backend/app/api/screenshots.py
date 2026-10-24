@@ -11,7 +11,7 @@ from __future__ import annotations
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 
 from app.api.deps import SessionDep, client_ip, require_permission
 from app.core.audit import record_action
@@ -133,6 +133,19 @@ async def list_screenshots(
         )
     ).scalars().all()
     return list(rows)
+
+
+@router.get("/devices/{device_uid}/screenshots/count")
+async def count_screenshots(
+    device_uid: str, session: SessionDep, admin: ViewScreenshots
+):
+    device = await _device_or_404(session, device_uid)
+    total = await session.scalar(
+        select(func.count()).select_from(Screenshot).where(
+            Screenshot.device_id == device.id
+        )
+    )
+    return {"count": int(total or 0)}
 
 
 @router.delete(

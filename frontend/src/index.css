@@ -657,6 +657,21 @@ h2 {
   background: none;
   cursor: pointer;
 }
+.shot-scroll {
+  max-height: 520px;
+  overflow-y: auto;
+  margin-top: 0.75rem;
+  padding-right: 0.25rem;
+}
+.shot-scroll .shot-grid {
+  margin-top: 0;
+}
+.lightbox-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
 .lightbox {
   max-width: 92vw;
   display: flex;

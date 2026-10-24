@@ -105,6 +105,10 @@ export function deleteAllScreenshots(uid: string): Promise<void> {
   return apiRequest<void>(`/devices/${uid}/screenshots`, { method: "DELETE" });
 }
 
+export function getScreenshotCount(uid: string): Promise<{ count: number }> {
+  return apiRequest<{ count: number }>(`/devices/${uid}/screenshots/count`);
+}
+
 export function getScreenshotImage(id: number): Promise<Blob> {
   return apiBlob(`/screenshots/${id}/image`);
 }
